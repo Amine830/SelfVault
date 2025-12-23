@@ -25,6 +25,7 @@ pnpm-debug.log*
 # Testing
 coverage/
 .nyc_output
+.token
 
 # Editor directories and files
 .vscode/*
@@ -44,8 +45,14 @@ coverage/
 docker-compose.override.yml
 
 # Prisma
-prisma/migrations/
-!prisma/migrations/.gitkeep
+# IMPORTANT: commit `prisma/schema.prisma` and the `prisma/migrations/` folder (SQL migration files).
+# These belong in git so teams and deployments share the same schema and migration history.
+# Ignore generated artifacts and local DB files instead.
+.prisma/
+prisma/dev.db
+*.sqlite
+*.db
+
 
 # Local storage
 data/uploads/
