@@ -1,0 +1,14 @@
+# Ignorer les scripts utilitaires et de test JS qui provoquent des erreurs de parsing
+backend/scripts/*.js
+backend/scripts/*.mjs
+
+# Ignorer les dossiers de dépendances et de build
+node_modules/
+dist/
+build/
+
+# Fichiers communs à ignorer
+.env
+.env.*
+*.log
+.vscode/
