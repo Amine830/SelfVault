@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   LogOut,
@@ -9,9 +9,9 @@ import {
   Trash,
   FolderPlus,
   RefreshCw,
-  Link,
+  Link as LinkIcon,
   Info,
- } from 'lucide-react';
+} from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import {
   listFiles,
@@ -20,7 +20,7 @@ import {
   downloadFile,
   getFileUrl,
 } from '../api/files';
-import { listCategories, createCategory } from '../api/categories';
+import { listCategories, createCategory, updateCategory, deleteCategory } from '../api/categories';
 import type { File as FileItem, Category } from '../types';
 import FileDetailsModal from '../components/files/FileDetailsModal';
 
@@ -43,6 +43,9 @@ export default function DashboardPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#0ea5e9');
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [categoryFeedback, setCategoryFeedback] = useState<string | null>(null);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [detailsFileId, setDetailsFileId] = useState<string | null>(null);
   const [copiedFileId, setCopiedFileId] = useState<string | null>(null);
@@ -89,6 +92,44 @@ export default function DashboardPage() {
       setNewCategoryName('');
       setNewCategoryColor('#0ea5e9');
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setCategoryFeedback('Catégorie créée.');
+      window.setTimeout(() => setCategoryFeedback(null), 2000);
+      setCategoryError(null);
+    },
+    onError: () => {
+      setCategoryError('Impossible de créer la catégorie (vérifiez le nom).');
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: (data: { id: number; name: string; color: string }) =>
+      updateCategory(data.id, { name: data.name, color: data.color }),
+    onSuccess: () => {
+      setEditingCategory(null);
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setCategoryFeedback('Catégorie mise à jour.');
+      window.setTimeout(() => setCategoryFeedback(null), 2000);
+      setCategoryError(null);
+    },
+    onError: () => {
+      setCategoryError('Échec de la mise à jour de la catégorie.');
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: number) => deleteCategory(id),
+    onSuccess: (_, id) => {
+      if (selectedCategoryId === id) {
+        setSelectedCategoryId(null);
+      }
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['files'] });
+      setCategoryFeedback('Catégorie supprimée.');
+      window.setTimeout(() => setCategoryFeedback(null), 2000);
+      setCategoryError(null);
+    },
+    onError: () => {
+      setCategoryError('Impossible de supprimer la catégorie.');
     },
   });
 
@@ -146,6 +187,25 @@ export default function DashboardPage() {
     await createCategoryMutation.mutateAsync();
   };
 
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory({ ...category });
+  };
+
+  const handleSaveCategory = async () => {
+    if (!editingCategory) return;
+    if (!editingCategory.name.trim()) return;
+    await updateCategoryMutation.mutateAsync({
+      id: editingCategory.id,
+      name: editingCategory.name,
+      color: editingCategory.color ?? '#6366f1',
+    });
+  };
+
+  const handleDeleteCategory = async (category: Category) => {
+    if (!window.confirm(`Supprimer la catégorie “${category.name}” ?`)) return;
+    await deleteCategoryMutation.mutateAsync(category.id);
+  };
+
   const currentCategory = useMemo(() => {
     if (!selectedCategoryId) return 'Toutes les catégories';
     const match = categoriesQuery.data?.find((c) => c.id === selectedCategoryId);
@@ -165,6 +225,13 @@ export default function DashboardPage() {
                 <User className="w-5 h-5" />
                 <span className="text-sm">{user?.email}</span>
               </div>
+
+              <Link
+                to="/settings"
+                className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
+              >
+                Paramètres
+              </Link>
 
               <button
                 onClick={handleLogout}
@@ -293,6 +360,119 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
+
+          {(categoryFeedback || categoryError) && (
+            <div
+              className={`mt-3 rounded-lg px-3 py-2 text-xs ${
+                categoryFeedback ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+              }`}
+            >
+              {categoryFeedback || categoryError}
+            </div>
+          )}
+
+          <div className="mt-6">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3">Catégories</h3>
+            <div className="overflow-x-auto border border-gray-100 rounded-lg">
+              <table className="min-w-full divide-y divide-gray-100">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Nom</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Couleur</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 bg-white text-sm">
+                  {categoriesQuery.data?.map((category) => {
+                    const colorValue = category.color ?? '#6366f1';
+                    const isEditing = editingCategory?.id === category.id;
+                    return (
+                      <tr key={category.id}>
+                        <td className="px-4 py-3">
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              value={editingCategory.name}
+                              onChange={(event) =>
+                                setEditingCategory((prev) => prev && { ...prev, name: event.target.value })
+                              }
+                              className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                            />
+                          ) : (
+                            <span>{category.name}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          {isEditing ? (
+                            <input
+                              type="color"
+                              value={editingCategory.color ?? '#6366f1'}
+                              onChange={(event) =>
+                                setEditingCategory((prev) => prev && { ...prev, color: event.target.value })
+                              }
+                              className="h-8 w-12 rounded border border-gray-200"
+                            />
+                          ) : (
+                            <span className="inline-flex items-center gap-2">
+                              <span
+                                className="inline-block h-3 w-3 rounded-full"
+                                style={{ backgroundColor: colorValue }}
+                              />
+                              <span>{colorValue}</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            {isEditing ? (
+                              <>
+                                <button
+                                  onClick={handleSaveCategory}
+                                  disabled={updateCategoryMutation.isPending}
+                                  className="rounded-md bg-primary-500 px-3 py-1 text-xs font-medium text-white hover:bg-primary-600 disabled:opacity-60"
+                                >
+                                  Sauver
+                                </button>
+                                <button
+                                  onClick={() => setEditingCategory(null)}
+                                  className="rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                                >
+                                  Annuler
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => handleEditCategory(category)}
+                                  className="rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                                >
+                                  Éditer
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteCategory(category)}
+                                  disabled={deleteCategoryMutation.isPending}
+                                  className="rounded-md border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-60"
+                                >
+                                  Supprimer
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {(!categoriesQuery.data || categoriesQuery.data.length === 0) && (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-4 text-center text-sm text-gray-400">
+                        Aucune catégorie.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         {/* Files table */}
@@ -353,7 +533,7 @@ export default function DashboardPage() {
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100"
                           disabled={signedUrlMutation.isPending && signedUrlMutation.variables === file.id}
                         >
-                          <Link className="w-4 h-4" />
+                          <LinkIcon className="w-4 h-4" />
                           Copier URL
                         </button>
                         <button
