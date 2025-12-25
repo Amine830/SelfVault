@@ -9,11 +9,20 @@ import {
   Trash,
   FolderPlus,
   RefreshCw,
-} from 'lucide-react';
+  Link,
+  Info,
+ } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
-import { listFiles, uploadFile as uploadFileApi, deleteFile, downloadFile } from '../api/files';
+import {
+  listFiles,
+  uploadFile as uploadFileApi,
+  deleteFile,
+  downloadFile,
+  getFileUrl,
+} from '../api/files';
 import { listCategories, createCategory } from '../api/categories';
-import type { File as FileItem } from '../types';
+import type { File as FileItem, Category } from '../types';
+import FileDetailsModal from '../components/files/FileDetailsModal';
 
 function formatSize(size: string) {
   const value = Number(size);
@@ -35,6 +44,9 @@ export default function DashboardPage() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#0ea5e9');
   const [page, setPage] = useState(1);
+  const [detailsFileId, setDetailsFileId] = useState<string | null>(null);
+  const [copiedFileId, setCopiedFileId] = useState<string | null>(null);
+  const [copyErrorId, setCopyErrorId] = useState<string | null>(null);
 
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
@@ -80,6 +92,20 @@ export default function DashboardPage() {
     },
   });
 
+  const signedUrlMutation = useMutation({
+    mutationFn: (id: string) => getFileUrl(id),
+    onSuccess: (_data, id) => {
+      setCopiedFileId(id);
+      window.setTimeout(() => setCopiedFileId((current) => (current === id ? null : current)), 2500);
+      setCopyErrorId(null);
+    },
+    onError: (_error, id) => {
+      setCopyErrorId(id);
+      window.setTimeout(() => setCopyErrorId((current) => (current === id ? null : current)), 2500);
+      setCopiedFileId(null);
+    },
+  });
+
   const files = filesQuery.data?.files ?? [];
   const totalPages = filesQuery.data?.totalPages ?? 1;
 
@@ -104,6 +130,15 @@ export default function DashboardPage() {
 
   const handleDelete = async (file: FileItem) => {
     await deleteMutation.mutateAsync(file.id);
+  };
+
+  const handleCopySignedUrl = async (file: FileItem) => {
+    try {
+      const { url } = await signedUrlMutation.mutateAsync(file.id);
+      await navigator.clipboard.writeText(url);
+    } catch (error) {
+      console.error('Copy signed URL failed:', error);
+    }
   };
 
   const handleCreateCategory = async () => {
@@ -314,6 +349,21 @@ export default function DashboardPage() {
                     <td className="px-4 py-3 text-right text-sm">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          onClick={() => handleCopySignedUrl(file)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100"
+                          disabled={signedUrlMutation.isPending && signedUrlMutation.variables === file.id}
+                        >
+                          <Link className="w-4 h-4" />
+                          Copier URL
+                        </button>
+                        <button
+                          onClick={() => setDetailsFileId(file.id)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-gray-700 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200"
+                        >
+                          <Info className="w-4 h-4" />
+                          Détails
+                        </button>
+                        <button
                           onClick={() => handleDownload(file)}
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-primary-700 bg-primary-50 border border-primary-100 rounded-lg hover:bg-primary-100"
                         >
@@ -344,6 +394,13 @@ export default function DashboardPage() {
             </table>
           </div>
 
+          {(copiedFileId || copyErrorId) && (
+            <div className="border-t bg-white px-4 py-3 text-sm">
+              {copiedFileId && <span className="text-green-600">Lien copié dans le presse-papiers (valide 1h).</span>}
+              {copyErrorId && <span className="text-red-600">Impossible de copier le lien pour ce fichier.</span>}
+            </div>
+          )}
+
           <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
             <span className="text-xs text-gray-500">Page {page} / {totalPages}</span>
             <div className="flex items-center gap-2">
@@ -369,6 +426,18 @@ export default function DashboardPage() {
           <div className="text-sm text-gray-500">Mises à jour en cours...</div>
         )}
       </main>
+
+      {detailsFileId && (
+        <FileDetailsModal
+          fileId={detailsFileId}
+          categories={(categoriesQuery.data as Category[] | undefined) ?? []}
+          onClose={() => setDetailsFileId(null)}
+          onUpdated={() => {
+            setDetailsFileId(null);
+            queryClient.invalidateQueries({ queryKey: ['files'] });
+          }}
+        />
+      )}
     </div>
   );
 }
