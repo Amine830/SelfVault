@@ -1,6 +1,9 @@
 import express, { Application } from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
+import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import path from 'path';
 import compression from 'compression';
 import { config } from './config';
 import { errorHandler } from './utils/errors';
@@ -8,6 +11,27 @@ import { requestLogger } from './middlewares/logger';
 import { sanitizeInput } from './middlewares/validation';
 import { globalRateLimiter } from './middlewares/rateLimiter';
 import routes from './routes';
+
+const openApiCandidates = [
+  path.join(__dirname, 'docs/openapi.json'),
+  path.join(__dirname, '../docs/openapi.json'),
+  path.join(process.cwd(), 'src/docs/openapi.json'),
+  path.join(process.cwd(), 'docs/openapi.json'),
+  path.join(process.cwd(), 'openapi/openapi.json'),
+];
+
+const openApiPath = openApiCandidates.find((candidate) => fs.existsSync(candidate));
+
+let swaggerDocument: Record<string, unknown> | undefined;
+
+if (openApiPath) {
+  try {
+    const source = fs.readFileSync(openApiPath, 'utf8');
+    swaggerDocument = JSON.parse(source);
+  } catch (error) {
+    console.error('Failed to load OpenAPI document:', error);
+  }
+}
 
 /**
  * Crée et configure l'application Express
@@ -39,13 +63,22 @@ export function createApp(): Application {
   // Routes
   app.use('/api', routes);
 
+  if (swaggerDocument) {
+    app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    app.get('/docs/openapi.json', (_req, res) => {
+      res.json(swaggerDocument);
+    });
+  } else {
+    console.warn('OpenAPI document not found. Skipping /docs route.');
+  }
+
   // Route racine
   app.get('/', (_req, res) => {
     res.json({
       name: 'SelfVault API',
       version: '1.0.0',
       description: 'Self-hosted file storage solution',
-      docs: '/api/health',
+      docs: swaggerDocument ? '/docs' : null,
     });
   });
 

@@ -105,6 +105,12 @@ npm run build
 npm start
 ```
 
+### Documentation API
+
+- Swagger UI disponible sur `http://localhost:8080/docs`
+- Spécification OpenAPI brute sur `http://localhost:8080/docs/openapi.json`
+- Fichier source : `src/docs/openapi.json`
+
 ## Structure du projet
 
 ```txt
@@ -134,6 +140,8 @@ backend/
 │   │   ├── FileService.ts
 │   │   ├── CategoryService.ts
 │   │   └── UserService.ts
+│   ├── docs/              # Documentation API
+│   │   └── openapi.json
 │   ├── utils/              # Utilitaires
 │   │   ├── logger.ts
 │   │   ├── errors.ts
@@ -178,9 +186,9 @@ GET  /api/health          Statut du serveur
 
 ```
 GET  /api/me              Profil de l'utilisateur connecté
-PUT  /api/me              Mettre à jour le profil
+PATCH /api/me             Mettre à jour le profil
 GET  /api/settings        Paramètres utilisateur
-PUT  /api/settings        Mettre à jour les paramètres
+PATCH /api/settings       Mettre à jour les paramètres
 ```
 
 ### Catégories
@@ -266,5 +274,4 @@ MIT License - Voir [LICENSE](../LICENSE)
 
 ---
 
-Dernière mise à jour : 23 décembre 2025
-
+Dernière mise à jour : 26 décembre 2025

@@ -78,7 +78,6 @@ Quelques tâches planifiées pour les prochaines versions — voir `NEXT_STEPS.m
 
 - Docker + Docker Compose (fichier de développement fourni)
 
-
 ## Installation
 
 ### Prérequis
@@ -213,6 +212,12 @@ npm test
 - `PATCH /settings` - Modifier paramètres
 
 Tous les endpoints nécessitent un token JWT dans le header `Authorization: Bearer <token>`.
+
+### Documentation API
+
+- Swagger UI disponible sur `http://localhost:8080/docs`
+- Spécification OpenAPI brute sur `http://localhost:8080/docs/openapi.json`
+- Fichier source : `src/docs/openapi.json`
 
 ## Sécurité
 

@@ -1,0 +1,603 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SelfVault API",
+    "description": "OpenAPI specification for the SelfVault backend service.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development"
+    }
+  ],
+  "tags": [
+    { "name": "System" },
+    { "name": "Users" },
+    { "name": "Settings" },
+    { "name": "Categories" },
+    { "name": "Files" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "example": "error" },
+          "message": { "type": "string" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "username": { "type": ["string", "null"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "email", "createdAt", "updatedAt"]
+      },
+      "StorageInfo": {
+        "type": "object",
+        "properties": {
+          "used": { "type": "string", "description": "Bytes used by the user" },
+          "limit": { "type": "string", "description": "Storage quota in bytes" },
+          "percentage": { "type": "number" }
+        }
+      },
+      "UserSettings": {
+        "type": "object",
+        "properties": {
+          "storageLimit": { "type": "string", "description": "Storage quota in bytes" },
+          "preferences": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["storageLimit", "preferences"]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "ownerId": { "type": "string" },
+          "name": { "type": "string" },
+          "color": { "type": ["string", "null"], "example": "#0ea5e9" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "ownerId", "name"]
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "ownerId": { "type": "string" },
+          "filename": { "type": "string" },
+          "storagePath": { "type": "string" },
+          "storageProvider": { "type": "string" },
+          "mimetype": { "type": ["string", "null"] },
+          "size": { "type": "string", "description": "File size stored as stringified bigint" },
+          "sha256": { "type": "string" },
+          "visibility": { "type": "string", "enum": ["private", "public"] },
+          "categoryId": { "type": ["integer", "null"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "category": { "$ref": "#/components/schemas/Category" }
+        },
+        "required": ["id", "ownerId", "filename", "storagePath", "storageProvider", "size", "sha256", "visibility", "createdAt", "updatedAt"]
+      },
+      "PaginatedFiles": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/File" }
+          },
+          "total": { "type": "integer" },
+          "page": { "type": "integer" },
+          "totalPages": { "type": "integer" }
+        }
+      },
+      "CategoryInput": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Documents" },
+          "color": { "type": "string", "example": "#0ea5e9" }
+        },
+        "required": ["name"]
+      },
+      "UpdateFileInput": {
+        "type": "object",
+        "properties": {
+          "filename": { "type": "string" },
+          "visibility": { "type": "string", "enum": ["private", "public"] },
+          "categoryId": { "type": ["integer", "null"] }
+        }
+      },
+      "UpdateProfileInput": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string" }
+        }
+      },
+      "UpdateSettingsInput": {
+        "type": "object",
+        "properties": {
+          "storageLimit": { "type": "string", "description": "Storage quota in bytes" },
+          "preferences": { "type": "object", "additionalProperties": true }
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Authentication required",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ApiError" }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ApiError" }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/ApiError" }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    { "bearerAuth": [] }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": ["System"],
+        "summary": "API health check",
+        "responses": {
+          "200": {
+            "description": "Service status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "timestamp": { "type": "string", "format": "date-time" },
+                    "uptime": { "type": "number" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/me": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get current user profile",
+        "responses": {
+          "200": {
+            "description": "User info and storage usage",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": { "$ref": "#/components/schemas/User" },
+                    "storage": { "$ref": "#/components/schemas/StorageInfo" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "patch": {
+        "tags": ["Users"],
+        "summary": "Update user profile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProfileInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "tags": ["Settings"],
+        "summary": "Get current user settings",
+        "responses": {
+          "200": {
+            "description": "User settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": { "$ref": "#/components/schemas/UserSettings" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "patch": {
+        "tags": ["Settings"],
+        "summary": "Update user settings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateSettingsInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "settings": { "$ref": "#/components/schemas/UserSettings" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "List categories",
+        "responses": {
+          "200": {
+            "description": "Array of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categories": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Category" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["Categories"],
+        "summary": "Create category",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "category": { "$ref": "#/components/schemas/Category" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "get": {
+        "tags": ["Categories"],
+        "summary": "Get category by id",
+        "responses": {
+          "200": {
+            "description": "Category details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "category": { "$ref": "#/components/schemas/Category" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "patch": {
+        "tags": ["Categories"],
+        "summary": "Update category",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated category",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "category": { "$ref": "#/components/schemas/Category" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Categories"],
+        "summary": "Delete category",
+        "responses": {
+          "204": { "description": "Category deleted" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/files": {
+      "get": {
+        "tags": ["Files"],
+        "summary": "List files",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "categoryId", "in": "query", "schema": { "type": "integer" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated files",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaginatedFiles" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/files/upload": {
+      "post": {
+        "tags": ["Files"],
+        "summary": "Upload a file",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": { "type": "string", "format": "binary" },
+                  "filename": { "type": "string" },
+                  "categoryId": { "type": "integer" },
+                  "visibility": { "type": "string", "enum": ["private", "public"] }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Uploaded file metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": { "$ref": "#/components/schemas/File" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/files/{id}": {
+      "parameters": [
+        { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+      ],
+      "get": {
+        "tags": ["Files"],
+        "summary": "Get file metadata",
+        "responses": {
+          "200": {
+            "description": "File metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": { "$ref": "#/components/schemas/File" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "patch": {
+        "tags": ["Files"],
+        "summary": "Update file metadata",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateFileInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated file metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": { "$ref": "#/components/schemas/File" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["Files"],
+        "summary": "Delete file",
+        "responses": {
+          "204": { "description": "File deleted" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/files/{id}/download": {
+      "get": {
+        "tags": ["Files"],
+        "summary": "Download file content",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Binary stream",
+            "content": {
+              "application/octet-stream": {
+                "schema": { "type": "string", "format": "binary" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/files/{id}/url": {
+      "get": {
+        "tags": ["Files"],
+        "summary": "Get signed download URL",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signed URL response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": { "type": "string", "format": "uri" },
+                    "expiresIn": { "type": "integer", "description": "Expiration in seconds" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    }
+  }
+}
