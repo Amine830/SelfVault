@@ -67,55 +67,57 @@ export default function FileDetailsModal({ fileId, categories, onClose, onUpdate
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-2xl rounded-xl bg-white shadow-xl">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 dark:bg-black/80 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl rounded-xl bg-white dark:bg-zinc-900 shadow-xl dark:shadow-2xl dark:shadow-black/50 border border-transparent dark:border-zinc-800">
+        <div className="flex items-center justify-between border-b border-gray-200 dark:border-zinc-800 px-6 py-4">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Détails du fichier</h3>
-            <p className="text-sm text-gray-500">Identifiant {fileId}</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Détails du fichier</h3>
+            <p className="text-sm text-gray-500 dark:text-zinc-400">Identifiant {fileId}</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 text-gray-500 hover:bg-gray-100">
+          <button onClick={onClose} className="rounded-full p-2 text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="px-6 py-5">
-          {fileQuery.isLoading && <p className="text-sm text-gray-500">Chargement...</p>}
-          {fileQuery.error && <p className="text-sm text-red-600">Impossible de charger ce fichier.</p>}
+          {fileQuery.isLoading && <p className="text-sm text-gray-500 dark:text-zinc-400">Chargement...</p>}
+          {fileQuery.error && <p className="text-sm text-red-600 dark:text-red-400">Impossible de charger ce fichier.</p>}
 
           {file && (
             <div className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-medium uppercase text-gray-500">Nom du fichier</label>
+                  <label className="text-xs font-medium uppercase text-gray-500 dark:text-zinc-400">Nom du fichier</label>
                   <input
                     type="text"
                     value={filename}
                     onChange={(event) => setFilename(event.target.value)}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+                    className="mt-1 w-full rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium uppercase text-gray-500">Visibilité</label>
-                  <div className="mt-2 flex items-center gap-4 text-sm">
-                    <label className="inline-flex items-center gap-2">
+                  <label className="text-xs font-medium uppercase text-gray-500 dark:text-zinc-400">Visibilité</label>
+                  <div className="mt-2 flex items-center gap-4 text-sm text-gray-700 dark:text-zinc-300">
+                    <label className="inline-flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
                         name="visibility"
                         value="private"
                         checked={visibility === 'private'}
                         onChange={() => setVisibility('private')}
+                        className="accent-primary-500"
                       />
                       Privé
                     </label>
-                    <label className="inline-flex items-center gap-2">
+                    <label className="inline-flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
                         name="visibility"
                         value="public"
                         checked={visibility === 'public'}
                         onChange={() => setVisibility('public')}
+                        className="accent-primary-500"
                       />
                       Public
                     </label>
@@ -123,14 +125,14 @@ export default function FileDetailsModal({ fileId, categories, onClose, onUpdate
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium uppercase text-gray-500">Catégorie</label>
+                  <label className="text-xs font-medium uppercase text-gray-500 dark:text-zinc-400">Catégorie</label>
                   <select
                     value={categoryId ?? 0}
                     onChange={(event) => {
                       const value = Number(event.target.value);
                       setCategoryId(value === 0 ? null : value);
                     }}
-                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+                    className="mt-1 w-full rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none"
                   >
                     {categoryOptions.map((category) => (
                       <option key={category.id} value={category.id}>
@@ -141,41 +143,41 @@ export default function FileDetailsModal({ fileId, categories, onClose, onUpdate
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium uppercase text-gray-500">Taille</label>
-                  <p className="mt-1 text-sm text-gray-700">{file.size}</p>
+                  <label className="text-xs font-medium uppercase text-gray-500 dark:text-zinc-400">Taille</label>
+                  <p className="mt-1 text-sm text-gray-700 dark:text-zinc-300">{file.size}</p>
                 </div>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-medium uppercase text-gray-500">Hash SHA256</label>
-                  <p className="mt-1 break-all text-sm text-gray-700">{file.sha256}</p>
+                  <label className="text-xs font-medium uppercase text-gray-500 dark:text-zinc-400">Hash SHA256</label>
+                  <p className="mt-1 break-all text-sm text-gray-700 dark:text-zinc-300">{file.sha256}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium uppercase text-gray-500">Chemin de stockage</label>
-                  <p className="mt-1 break-all text-sm text-gray-700">{file.storagePath}</p>
+                  <label className="text-xs font-medium uppercase text-gray-500 dark:text-zinc-400">Chemin de stockage</label>
+                  <p className="mt-1 break-all text-sm text-gray-700 dark:text-zinc-300">{file.storagePath}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium uppercase text-gray-500">Créé le</label>
-                  <p className="mt-1 text-sm text-gray-700">{formatDate(file.createdAt)}</p>
+                  <label className="text-xs font-medium uppercase text-gray-500 dark:text-zinc-400">Créé le</label>
+                  <p className="mt-1 text-sm text-gray-700 dark:text-zinc-300">{formatDate(file.createdAt)}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium uppercase text-gray-500">Mis à jour le</label>
-                  <p className="mt-1 text-sm text-gray-700">{formatDate(file.updatedAt)}</p>
+                  <label className="text-xs font-medium uppercase text-gray-500 dark:text-zinc-400">Mis à jour le</label>
+                  <p className="mt-1 text-sm text-gray-700 dark:text-zinc-300">{formatDate(file.updatedAt)}</p>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t bg-gray-50 px-6 py-4">
-          <button onClick={onClose} className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-white">
+        <div className="flex items-center justify-end gap-3 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50 px-6 py-4">
+          <button onClick={onClose} className="rounded-lg border border-gray-200 dark:border-zinc-700 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 transition-colors">
             Fermer
           </button>
           <button
             onClick={handleSubmit}
             disabled={isSaving || !file}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60 shadow-lg shadow-primary-500/25 transition-all"
           >
             {isSaving ? (
               <span>Enregistrement...</span>

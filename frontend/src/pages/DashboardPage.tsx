@@ -29,6 +29,7 @@ import type { File as FileItem, Category } from '../types';
 import FileDetailsModal from '../components/files/FileDetailsModal';
 import ShareModal from '../components/files/ShareModal';
 import QuotaBar from '../components/common/QuotaBar';
+import ThemeToggle from '../components/common/ThemeToggle';
 
 function formatSize(size: string) {
   const value = Number(size);
@@ -226,32 +227,34 @@ export default function DashboardPage() {
   }, [selectedCategoryId, categoriesQuery.data]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white dark:bg-zinc-900 shadow-sm border-b border-gray-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">SelfVault</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">SelfVault</h1>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-gray-700">
+              <div className="flex items-center gap-2 text-gray-700 dark:text-zinc-300">
                 <User className="w-5 h-5" />
-                <span className="text-sm">{user?.email}</span>
+                <span className="text-sm hidden sm:inline">{user?.email}</span>
               </div>
+
+              <ThemeToggle />
 
               <Link
                 to="/settings"
-                className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                className="rounded-lg border border-gray-200 dark:border-zinc-700 px-3 py-2 text-sm text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 Paramètres
               </Link>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               >
                 <LogOut className="w-4 h-4" />
-                Déconnexion
+                <span className="hidden sm:inline">Déconnexion</span>
               </button>
             </div>
           </div>
@@ -265,22 +268,22 @@ export default function DashboardPage() {
           <QuotaBar storage={meQuery.data.storage} />
         )}
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-zinc-900 rounded-lg shadow dark:shadow-black/20 p-6 border border-transparent dark:border-zinc-800">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Fichiers</h2>
-              <p className="text-gray-600 text-sm">Gérez vos uploads et vos catégories</p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Fichiers</h2>
+              <p className="text-gray-600 dark:text-zinc-400 text-sm">Gérez vos uploads et vos catégories</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <label className="flex items-center gap-3 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100">
+              <label className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors">
                 <input
                   type="file"
                   className="hidden"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
                 />
-                <Upload className="w-4 h-4 text-gray-600" />
-                <span className="text-sm text-gray-700">
+                <Upload className="w-4 h-4 text-gray-600 dark:text-zinc-400" />
+                <span className="text-sm text-gray-700 dark:text-zinc-300 truncate max-w-[150px]">
                   {selectedFile ? selectedFile.name : 'Choisir un fichier'}
                 </span>
               </label>
@@ -288,20 +291,20 @@ export default function DashboardPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setVisibility('private')}
-                  className={`px-3 py-2 text-sm rounded-lg border ${
+                  className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
                     visibility === 'private'
-                      ? 'border-primary-500 text-primary-700 bg-primary-50'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      ? 'border-primary-500 text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800'
                   }`}
                 >
                   Privé
                 </button>
                 <button
                   onClick={() => setVisibility('public')}
-                  className={`px-3 py-2 text-sm rounded-lg border ${
+                  className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
                     visibility === 'public'
-                      ? 'border-primary-500 text-primary-700 bg-primary-50'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      ? 'border-primary-500 text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800'
                   }`}
                 >
                   Public
@@ -311,7 +314,7 @@ export default function DashboardPage() {
               <select
                 value={selectedCategoryId ?? ''}
                 onChange={(e) => setSelectedCategoryId(e.target.value ? Number(e.target.value) : null)}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white"
+                className="px-3 py-2 text-sm border border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-700 dark:text-zinc-300"
               >
                 <option value="">Toutes les catégories</option>
                 {categoriesQuery.data?.map((cat) => (
@@ -324,7 +327,7 @@ export default function DashboardPage() {
               <button
                 onClick={handleUpload}
                 disabled={!selectedFile || uploadMutation.isPending}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary-500/25"
               >
                 {uploadMutation.isPending ? (
                   <>
@@ -349,29 +352,29 @@ export default function DashboardPage() {
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="Nouvelle catégorie"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500"
               />
               <input
                 type="color"
                 value={newCategoryColor}
                 onChange={(e) => setNewCategoryColor(e.target.value)}
-                className="w-12 h-10 border border-gray-200 rounded"
+                className="w-12 h-10 border border-gray-200 dark:border-zinc-700 rounded cursor-pointer"
                 aria-label="Couleur"
               />
               <button
                 onClick={handleCreateCategory}
                 disabled={createCategoryMutation.isPending || !newCategoryName.trim()}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-60"
+                className="inline-flex items-center gap-2 px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-700 disabled:opacity-60 transition-colors"
               >
                 <FolderPlus className="w-4 h-4" />
                 Ajouter
               </button>
             </div>
-            <div className="flex items-center justify-end text-sm text-gray-600 gap-2">
+            <div className="flex items-center justify-end text-sm text-gray-600 dark:text-zinc-400 gap-2">
               <span>Filtre : {currentCategory}</span>
               <button
                 onClick={() => queryClient.invalidateQueries({ queryKey: ['files'] })}
-                className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700"
+                className="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
               >
                 <RefreshCw className="w-4 h-4" />
                 Rafraîchir
@@ -382,7 +385,9 @@ export default function DashboardPage() {
           {(categoryFeedback || categoryError) && (
             <div
               className={`mt-3 rounded-lg px-3 py-2 text-xs ${
-                categoryFeedback ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                categoryFeedback 
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' 
+                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
               }`}
             >
               {categoryFeedback || categoryError}
@@ -390,22 +395,22 @@ export default function DashboardPage() {
           )}
 
           <div className="mt-6">
-            <h3 className="text-sm font-semibold text-gray-800 mb-3">Catégories</h3>
-            <div className="overflow-x-auto border border-gray-100 rounded-lg">
-              <table className="min-w-full divide-y divide-gray-100">
-                <thead className="bg-gray-50">
+            <h3 className="text-sm font-semibold text-gray-800 dark:text-zinc-200 mb-3">Catégories</h3>
+            <div className="overflow-x-auto border border-gray-100 dark:border-zinc-800 rounded-lg">
+              <table className="min-w-full divide-y divide-gray-100 dark:divide-zinc-800">
+                <thead className="bg-gray-50 dark:bg-zinc-800/50">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Nom</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Couleur</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">Actions</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-zinc-400">Nom</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-zinc-400">Couleur</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-zinc-400">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 bg-white text-sm">
+                <tbody className="divide-y divide-gray-100 dark:divide-zinc-800 bg-white dark:bg-zinc-900 text-sm">
                   {categoriesQuery.data?.map((category) => {
                     const colorValue = category.color ?? '#6366f1';
                     const isEditing = editingCategory?.id === category.id;
                     return (
-                      <tr key={category.id}>
+                      <tr key={category.id} className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
                         <td className="px-4 py-3">
                           {isEditing ? (
                             <input
@@ -414,10 +419,10 @@ export default function DashboardPage() {
                               onChange={(event) =>
                                 setEditingCategory((prev) => prev && { ...prev, name: event.target.value })
                               }
-                              className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm"
+                              className="w-full rounded-md border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 py-1 text-sm text-gray-900 dark:text-white"
                             />
                           ) : (
-                            <span>{category.name}</span>
+                            <span className="text-gray-900 dark:text-zinc-100">{category.name}</span>
                           )}
                         </td>
                         <td className="px-4 py-3">
@@ -428,7 +433,7 @@ export default function DashboardPage() {
                               onChange={(event) =>
                                 setEditingCategory((prev) => prev && { ...prev, color: event.target.value })
                               }
-                              className="h-8 w-12 rounded border border-gray-200"
+                              className="h-8 w-12 rounded border border-gray-200 dark:border-zinc-700 cursor-pointer"
                             />
                           ) : (
                             <span className="inline-flex items-center gap-2">
@@ -436,7 +441,7 @@ export default function DashboardPage() {
                                 className="inline-block h-3 w-3 rounded-full"
                                 style={{ backgroundColor: colorValue }}
                               />
-                              <span>{colorValue}</span>
+                              <span className="text-gray-700 dark:text-zinc-300">{colorValue}</span>
                             </span>
                           )}
                         </td>
@@ -453,7 +458,7 @@ export default function DashboardPage() {
                                 </button>
                                 <button
                                   onClick={() => setEditingCategory(null)}
-                                  className="rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                                  className="rounded-md border border-gray-200 dark:border-zinc-700 px-3 py-1 text-xs text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800"
                                 >
                                   Annuler
                                 </button>
@@ -462,14 +467,14 @@ export default function DashboardPage() {
                               <>
                                 <button
                                   onClick={() => handleEditCategory(category)}
-                                  className="rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-600 hover:bg-gray-100"
+                                  className="rounded-md border border-gray-200 dark:border-zinc-700 px-3 py-1 text-xs text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800"
                                 >
                                   Éditer
                                 </button>
                                 <button
                                   onClick={() => handleDeleteCategory(category)}
                                   disabled={deleteCategoryMutation.isPending}
-                                  className="rounded-md border border-red-200 px-3 py-1 text-xs text-red-600 hover:bg-red-50 disabled:opacity-60"
+                                  className="rounded-md border border-red-200 dark:border-red-800 px-3 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-60"
                                 >
                                   Supprimer
                                 </button>
@@ -482,7 +487,7 @@ export default function DashboardPage() {
                   })}
                   {(!categoriesQuery.data || categoriesQuery.data.length === 0) && (
                     <tr>
-                      <td colSpan={3} className="px-4 py-4 text-center text-sm text-gray-400">
+                      <td colSpan={3} className="px-4 py-4 text-center text-sm text-gray-400 dark:text-zinc-500">
                         Aucune catégorie.
                       </td>
                     </tr>
@@ -494,32 +499,32 @@ export default function DashboardPage() {
         </div>
 
         {/* Files table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-4 border-b flex items-center justify-between">
-            <span className="text-sm text-gray-700">
+        <div className="bg-white dark:bg-zinc-900 rounded-lg shadow dark:shadow-black/20 overflow-hidden border border-transparent dark:border-zinc-800">
+          <div className="p-4 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
+            <span className="text-sm text-gray-700 dark:text-zinc-300">
               {filesQuery.isFetching ? 'Chargement...' : `${files.length} fichier(s)`}
             </span>
             {filesQuery.error && (
-              <span className="text-sm text-red-600">Erreur de chargement</span>
+              <span className="text-sm text-red-600 dark:text-red-400">Erreur de chargement</span>
             )}
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-zinc-800">
+              <thead className="bg-gray-50 dark:bg-zinc-800/50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Nom</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Catégorie</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Visibilité</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">Taille</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400">Nom</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400">Catégorie</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400">Visibilité</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400">Taille</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-zinc-400">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
+              <tbody className="divide-y divide-gray-100 dark:divide-zinc-800 bg-white dark:bg-zinc-900">
                 {files.map((file) => (
-                  <tr key={file.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">{file.filename}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
+                  <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <td className="px-4 py-3 text-sm text-gray-900 dark:text-zinc-100">{file.filename}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-zinc-300">
                       {file.category ? (
                         <span
                           className="inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs"
@@ -529,15 +534,15 @@ export default function DashboardPage() {
                           {file.category.name}
                         </span>
                       ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-400 dark:text-zinc-500">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
                           file.visibility === 'private'
-                            ? 'bg-gray-100 text-gray-700'
-                            : 'bg-green-100 text-green-700'
+                            ? 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300'
+                            : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                         }`}
                       >
                         {file.visibility === 'private' ? (
@@ -547,19 +552,19 @@ export default function DashboardPage() {
                         )}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{formatSize(file.size)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-zinc-300">{formatSize(file.size)}</td>
                     <td className="px-4 py-3 text-right text-sm">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-2 flex-wrap">
                         <button
                           onClick={() => setShareFile(file)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-purple-700 bg-purple-50 border border-purple-100 rounded-lg hover:bg-purple-100"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
                         >
                           <Share2 className="w-4 h-4" />
                           Partager
                         </button>
                         <button
                           onClick={() => handleCopySignedUrl(file)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
                           disabled={signedUrlMutation.isPending && signedUrlMutation.variables === file.id}
                         >
                           <LinkIcon className="w-4 h-4" />
@@ -567,14 +572,14 @@ export default function DashboardPage() {
                         </button>
                         <button
                           onClick={() => setDetailsFileId(file.id)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-gray-700 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
                         >
                           <Info className="w-4 h-4" />
                           Détails
                         </button>
                         <button
                           onClick={() => handleDownload(file)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-primary-700 bg-primary-50 border border-primary-100 rounded-lg hover:bg-primary-100"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors"
                         >
                           <Download className="w-4 h-4" />
                           Télécharger
@@ -582,7 +587,7 @@ export default function DashboardPage() {
                         <button
                           onClick={() => handleDelete(file)}
                           disabled={deleteMutation.isPending}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 disabled:opacity-60"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 disabled:opacity-60 transition-colors"
                         >
                           <Trash className="w-4 h-4" />
                           Supprimer
@@ -594,7 +599,7 @@ export default function DashboardPage() {
 
                 {files.length === 0 && !filesQuery.isFetching && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500">
+                    <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-500 dark:text-zinc-500">
                       Aucun fichier pour le moment.
                     </td>
                   </tr>
@@ -604,26 +609,26 @@ export default function DashboardPage() {
           </div>
 
           {(copiedFileId || copyErrorId) && (
-            <div className="border-t bg-white px-4 py-3 text-sm">
-              {copiedFileId && <span className="text-green-600">Lien copié dans le presse-papiers (valide 1h).</span>}
-              {copyErrorId && <span className="text-red-600">Impossible de copier le lien pour ce fichier.</span>}
+            <div className="border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-3 text-sm">
+              {copiedFileId && <span className="text-green-600 dark:text-green-400">Lien copié dans le presse-papiers (valide 1h).</span>}
+              {copyErrorId && <span className="text-red-600 dark:text-red-400">Impossible de copier le lien pour ce fichier.</span>}
             </div>
           )}
 
-          <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
-            <span className="text-xs text-gray-500">Page {page} / {totalPages}</span>
+          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
+            <span className="text-xs text-gray-500 dark:text-zinc-400">Page {page} / {totalPages}</span>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1 || filesQuery.isFetching}
-                className="px-3 py-2 text-xs border border-gray-200 rounded-lg bg-white disabled:opacity-60"
+                className="px-3 py-2 text-xs border border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 disabled:opacity-60 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors"
               >
                 Précédent
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page >= totalPages || filesQuery.isFetching}
-                className="px-3 py-2 text-xs border border-gray-200 rounded-lg bg-white disabled:opacity-60"
+                className="px-3 py-2 text-xs border border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 disabled:opacity-60 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors"
               >
                 Suivant
               </button>
@@ -632,7 +637,7 @@ export default function DashboardPage() {
         </div>
 
         {(isLoading || categoriesQuery.isFetching) && (
-          <div className="text-sm text-gray-500">Mises à jour en cours...</div>
+          <div className="text-sm text-gray-500 dark:text-zinc-400">Mises à jour en cours...</div>
         )}
       </main>
 

@@ -8,6 +8,10 @@ import SettingsPage from './pages/SettingsPage';
 import SharedFilePage from './pages/SharedFilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
+import { initializeTheme } from './store/themeStore';
+
+// Initialiser le thème avant le rendu
+initializeTheme();
 
 // Créer le client React Query
 const queryClient = new QueryClient({

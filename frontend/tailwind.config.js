@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -18,6 +19,14 @@ export default {
           700: '#0369a1',
           800: '#075985',
           900: '#0c4a6e',
+        },
+        // Couleurs sombres AMOLED (noir pur)
+        dark: {
+          bg: '#000000',
+          card: '#0a0a0a',
+          elevated: '#141414',
+          border: '#1f1f1f',
+          hover: '#1a1a1a',
         },
       },
     },

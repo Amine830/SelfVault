@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { getSettings, updateSettings, updateProfile } from '../api/user';
+import ThemeToggle from '../components/common/ThemeToggle';
 
 const bytesToGigabytes = (value: string) => {
   const numeric = Number(value);
@@ -94,17 +95,18 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-300">
+      <header className="bg-white dark:bg-zinc-900 shadow-sm border-b border-gray-200 dark:border-zinc-800">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Paramètres</h1>
           <div className="flex items-center gap-3 text-sm">
-            <Link to="/dashboard" className="rounded-lg border border-gray-200 px-3 py-2 text-gray-600 hover:bg-gray-100">
+            <ThemeToggle />
+            <Link to="/dashboard" className="rounded-lg border border-gray-200 dark:border-zinc-700 px-3 py-2 text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
               Retour au dashboard
             </Link>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
             >
               Se déconnecter
             </button>
@@ -116,36 +118,38 @@ export default function SettingsPage() {
         {(feedback || error) && (
           <div
             className={`rounded-lg px-4 py-3 text-sm ${
-              feedback ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'
+              feedback 
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-800' 
+                : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-800'
             }`}
           >
             {feedback || error}
           </div>
         )}
 
-        <section className="bg-white rounded-xl shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900">Profil</h2>
-          <p className="text-sm text-gray-500">Mettre à jour votre nom d'utilisateur.</p>
+        <section className="bg-white dark:bg-zinc-900 rounded-xl shadow dark:shadow-black/20 p-6 border border-transparent dark:border-zinc-800">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profil</h2>
+          <p className="text-sm text-gray-500 dark:text-zinc-400">Mettre à jour votre nom d'utilisateur.</p>
 
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Adresse email</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Adresse email</label>
               <input
                 type="email"
                 value={user?.email ?? ''}
                 disabled
-                className="mt-1 w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600"
+                className="mt-1 w-full rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800 px-3 py-2 text-sm text-gray-600 dark:text-zinc-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Nom d'utilisateur</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Nom d'utilisateur</label>
               <input
                 type="text"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
                 placeholder="Votre pseudo"
-                className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+                className="mt-1 w-full rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
               />
             </div>
 
@@ -153,7 +157,7 @@ export default function SettingsPage() {
               <button
                 onClick={() => profileMutation.mutate()}
                 disabled={profileMutation.isPending}
-                className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60"
+                className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60 shadow-lg shadow-primary-500/25 transition-all"
               >
                 {profileMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
               </button>
@@ -161,53 +165,53 @@ export default function SettingsPage() {
           </div>
         </section>
 
-        <section className="bg-white rounded-xl shadow p-6">
+        <section className="bg-white dark:bg-zinc-900 rounded-xl shadow dark:shadow-black/20 p-6 border border-transparent dark:border-zinc-800">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Stockage et préférences</h2>
-              <p className="text-sm text-gray-500">Configurer votre quota et vos préférences personnalisées.</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Stockage et préférences</h2>
+              <p className="text-sm text-gray-500 dark:text-zinc-400">Configurer votre quota et vos préférences personnalisées.</p>
             </div>
-            {storageSummary && <span className="text-xs text-gray-500">{storageSummary}</span>}
+            {storageSummary && <span className="text-xs text-gray-500 dark:text-zinc-400">{storageSummary}</span>}
           </div>
 
           {isLoading ? (
-            <p className="mt-4 text-sm text-gray-500">Chargement des paramètres...</p>
+            <p className="mt-4 text-sm text-gray-500 dark:text-zinc-400">Chargement des paramètres...</p>
           ) : (
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Quota de stockage (en GB)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Quota de stockage (en GB)</label>
                 <input
                   type="number"
                   min="0.1"
                   step="0.1"
                   value={storageLimitGb}
                   onChange={(event) => setStorageLimitGb(event.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Préférences (JSON)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-300">Préférences (JSON)</label>
                 <textarea
                   value={preferencesText}
                   onChange={(event) => setPreferencesText(event.target.value)}
                   rows={6}
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 font-mono text-sm focus:border-primary-500 focus:outline-none"
+                  className="mt-1 w-full rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 font-mono text-sm text-gray-900 dark:text-white focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                 />
-                <p className="mt-1 text-xs text-gray-400">Exemple: {`{"defaultVisibility":"private"}`}</p>
+                <p className="mt-1 text-xs text-gray-400 dark:text-zinc-500">Exemple: {`{"defaultVisibility":"private"}`}</p>
               </div>
 
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => settingsQuery.refetch()}
-                  className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                  className="rounded-lg border border-gray-200 dark:border-zinc-700 px-4 py-2 text-sm text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
                 >
                   Réinitialiser
                 </button>
                 <button
                   onClick={() => settingsMutation.mutate()}
                   disabled={settingsMutation.isPending}
-                  className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60"
+                  className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-60 shadow-lg shadow-primary-500/25 transition-all"
                 >
                   {settingsMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
                 </button>
