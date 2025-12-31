@@ -1,6 +1,7 @@
 import { IStorageAdapter } from './IStorageAdapter';
 import { SupabaseStorageAdapter } from './SupabaseStorageAdapter';
 import { LocalStorageAdapter } from './LocalStorageAdapter';
+import { S3StorageAdapter } from './S3StorageAdapter';
 import { config } from '../config';
 
 /**
@@ -14,8 +15,7 @@ export function createStorageAdapter(): IStorageAdapter {
     case 'local':
       return new LocalStorageAdapter();
     case 's3':
-      // TODO: Implémenter S3StorageAdapter
-      throw new Error('S3 storage adapter not implemented yet');
+      return new S3StorageAdapter();
     default:
       throw new Error('Unknown storage provider: ' + String(config.storage.provider));
   }

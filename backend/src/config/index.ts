@@ -22,6 +22,14 @@ interface Config {
     provider: 'supabase' | 'local' | 's3';
     localPath: string;
   };
+  s3: {
+    endpoint: string;
+    region: string;
+    bucket: string;
+    accessKeyId: string;
+    secretAccessKey: string;
+    forcePathStyle: boolean;
+  };
   upload: {
     maxSizeBytes: number;
     maxStoragePerUserBytes: number;
@@ -40,14 +48,19 @@ interface Config {
  * Lance une erreur si une variable requise est manquante
  */
 function validateConfig(): Config {
-  const requiredEnvVars = [
-    'SUPABASE_URL',
-    'SUPABASE_ANON_KEY',
-    'SUPABASE_SERVICE_KEY',
-    'DATABASE_URL',
-    'DIRECT_URL',
-    'JWT_SECRET',
-  ];
+  const storageProvider =
+    (process.env.STORAGE_PROVIDER as 'supabase' | 'local' | 's3') || 'supabase';
+
+  // Variables requises selon le provider
+  const requiredEnvVars: string[] = ['DATABASE_URL', 'DIRECT_URL', 'JWT_SECRET'];
+
+  if (storageProvider === 'supabase') {
+    requiredEnvVars.push('SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_KEY');
+  }
+
+  if (storageProvider === 's3') {
+    requiredEnvVars.push('S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY', 'S3_BUCKET');
+  }
 
   for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
@@ -59,9 +72,9 @@ function validateConfig(): Config {
     port: parseInt(process.env.PORT || '8080', 10),
     nodeEnv: process.env.NODE_ENV || 'development',
     supabase: {
-      url: process.env.SUPABASE_URL!,
-      anonKey: process.env.SUPABASE_ANON_KEY!,
-      serviceKey: process.env.SUPABASE_SERVICE_KEY!,
+      url: process.env.SUPABASE_URL || '',
+      anonKey: process.env.SUPABASE_ANON_KEY || '',
+      serviceKey: process.env.SUPABASE_SERVICE_KEY || '',
     },
     database: {
       url: process.env.DATABASE_URL!,
@@ -71,8 +84,16 @@ function validateConfig(): Config {
       secret: process.env.JWT_SECRET!,
     },
     storage: {
-      provider: (process.env.STORAGE_PROVIDER as 'supabase' | 'local' | 's3') || 'supabase',
+      provider: storageProvider,
       localPath: process.env.LOCAL_STORAGE_PATH || './data/uploads',
+    },
+    s3: {
+      endpoint: process.env.S3_ENDPOINT || '',
+      region: process.env.S3_REGION || 'us-east-1',
+      bucket: process.env.S3_BUCKET || 'selfvault',
+      accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+      forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
     },
     upload: {
       maxSizeBytes: parseInt(process.env.MAX_UPLOAD_SIZE_BYTES || '10485760', 10),
