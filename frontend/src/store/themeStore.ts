@@ -9,50 +9,51 @@ interface ThemeState {
   toggleTheme: () => void;
 }
 
+function applyThemeToDOM(theme: Theme) {
+  if (typeof document === 'undefined') return;
+  
+  const root = document.documentElement;
+  
+  // Supprimer les deux classes puis ajouter la bonne
+  root.classList.remove('dark', 'light');
+  root.classList.add(theme);
+  
+  // Mettre à jour le meta theme-color pour les navigateurs mobiles
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute('content', theme === 'dark' ? '#000000' : '#f9fafb');
+  }
+}
+
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
       theme: 'light',
       setTheme: (theme: Theme) => {
         set({ theme });
-        applyTheme(theme);
+        applyThemeToDOM(theme);
       },
       toggleTheme: () => {
-        const newTheme = get().theme === 'light' ? 'dark' : 'light';
+        const currentTheme = get().theme;
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         set({ theme: newTheme });
-        applyTheme(newTheme);
+        applyThemeToDOM(newTheme);
       },
     }),
     {
       name: 'selfvault-theme',
-      onRehydrateStorage: () => (state) => {
-        // Appliquer le thème au chargement
-        if (state) {
-          applyTheme(state.theme);
-        }
-      },
     }
   )
 );
 
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  if (theme === 'dark') {
-    root.classList.add('dark');
-  } else {
-    root.classList.remove('dark');
+// Hook pour initialiser le thème côté client
+export function useInitializeTheme() {
+  const { theme, setTheme } = useThemeStore();
+  
+  // S'exécute une seule fois au montage
+  if (typeof window !== 'undefined') {
+    applyThemeToDOM(theme);
   }
-}
-
-// Initialiser le thème au chargement
-export function initializeTheme() {
-  const stored = localStorage.getItem('selfvault-theme');
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      applyTheme(parsed.state?.theme || 'light');
-    } catch {
-      applyTheme('light');
-    }
-  }
+  
+  return { theme, setTheme };
 }

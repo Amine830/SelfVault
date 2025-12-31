@@ -7,7 +7,24 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f9fafb" />
     <title>SelfVault</title>
+    <script>
+      // Appliquer le thème avant le rendu pour éviter le flash
+      (function() {
+        try {
+          const stored = localStorage.getItem('selfvault-theme');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            const theme = parsed.state?.theme;
+            if (theme === 'dark') {
+              document.documentElement.classList.add('dark');
+              document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#000000');
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -8,10 +8,7 @@ import SettingsPage from './pages/SettingsPage';
 import SharedFilePage from './pages/SharedFilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
-import { initializeTheme } from './store/themeStore';
-
-// Initialiser le thème avant le rendu
-initializeTheme();
+import { useThemeStore } from './store/themeStore';
 
 // Créer le client React Query
 const queryClient = new QueryClient({
@@ -36,14 +33,35 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Composant pour initialiser et synchroniser le thème avec le DOM
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    // Appliquer le thème au DOM à chaque changement
+    const root = document.documentElement;
+    root.classList.remove('dark', 'light');
+    root.classList.add(theme);
+    
+    // Mettre à jour le meta theme-color
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#000000' : '#f9fafb');
+    }
+  }, [theme]);
+
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthInitializer>
-        <BrowserRouter>
-          <Routes>
-            {/* Redirection racine vers login */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
+      <ThemeProvider>
+        <AuthInitializer>
+          <BrowserRouter>
+            <Routes>
+              {/* Redirection racine vers login */}
+              <Route path="/" element={<Navigate to="/login" replace />} />
             
             {/* Routes publiques */}
             <Route path="/login" element={<LoginPage />} />
@@ -70,6 +88,7 @@ function App() {
           </Routes>
         </BrowserRouter>
       </AuthInitializer>
+    </ThemeProvider>
     </QueryClientProvider>
   );
 }
