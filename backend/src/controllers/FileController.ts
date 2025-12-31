@@ -29,7 +29,7 @@ export class FileController {
 
       const file = await fileService.uploadFile(req.user.id, req.file, {
         filename,
-        categoryId: categoryId ? parseInt(categoryId, 10) : undefined,
+        categoryId: categoryId ? parseInt(String(categoryId), 10) : undefined,
         visibility,
       });
 
@@ -155,7 +155,7 @@ export class FileController {
           categoryId !== undefined
             ? categoryId === null
               ? null
-              : parseInt(categoryId, 10)
+              : parseInt(String(categoryId), 10)
             : undefined,
       });
 
