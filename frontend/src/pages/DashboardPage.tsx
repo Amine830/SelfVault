@@ -21,8 +21,10 @@ import {
   getFileUrl,
 } from '../api/files';
 import { listCategories, createCategory, updateCategory, deleteCategory } from '../api/categories';
+import { getMe } from '../api/user';
 import type { File as FileItem, Category } from '../types';
 import FileDetailsModal from '../components/files/FileDetailsModal';
+import QuotaBar from '../components/common/QuotaBar';
 
 function formatSize(size: string) {
   const value = Number(size);
@@ -55,6 +57,12 @@ export default function DashboardPage() {
     queryKey: ['categories'],
     queryFn: listCategories,
     staleTime: 5 * 60 * 1000,
+  });
+
+  const meQuery = useQuery({
+    queryKey: ['me'],
+    queryFn: getMe,
+    staleTime: 60 * 1000,
   });
 
   const filesQuery = useQuery({
@@ -247,6 +255,11 @@ export default function DashboardPage() {
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Quota Bar */}
+        {meQuery.data?.storage && (
+          <QuotaBar storage={meQuery.data.storage} />
+        )}
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>

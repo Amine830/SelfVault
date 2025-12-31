@@ -40,6 +40,13 @@ export interface UserSettings {
   preferences: Record<string, unknown>;
 }
 
+// Types pour les informations de stockage
+export interface StorageInfo {
+  used: string; // BigInt sérialisé
+  limit: string; // BigInt sérialisé
+  percentage: number;
+}
+
 // Types pour les réponses API
 export interface ApiResponse<T> {
   data?: T;

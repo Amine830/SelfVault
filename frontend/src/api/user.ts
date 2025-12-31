@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { User, UserSettings } from '../types';
+import type { User, UserSettings, StorageInfo } from '../types';
 
 export interface UpdateProfilePayload {
   username?: string | null;
@@ -9,6 +9,16 @@ export interface UpdateSettingsPayload {
   storageLimit?: string | number;
   preferences?: Record<string, unknown>;
 }
+
+export interface MeResponse {
+  user: User;
+  storage: StorageInfo;
+}
+
+export const getMe = async (): Promise<MeResponse> => {
+  const response = await apiClient.get<MeResponse>('/me');
+  return response.data;
+};
 
 export const updateProfile = async (data: UpdateProfilePayload): Promise<User> => {
   const response = await apiClient.patch<{ user: User }>('/me', data);
