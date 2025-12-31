@@ -11,6 +11,9 @@ import {
   RefreshCw,
   Link as LinkIcon,
   Info,
+  Share2,
+  Globe,
+  Lock,
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import {
@@ -24,6 +27,7 @@ import { listCategories, createCategory, updateCategory, deleteCategory } from '
 import { getMe } from '../api/user';
 import type { File as FileItem, Category } from '../types';
 import FileDetailsModal from '../components/files/FileDetailsModal';
+import ShareModal from '../components/files/ShareModal';
 import QuotaBar from '../components/common/QuotaBar';
 
 function formatSize(size: string) {
@@ -50,6 +54,7 @@ export default function DashboardPage() {
   const [categoryError, setCategoryError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [detailsFileId, setDetailsFileId] = useState<string | null>(null);
+  const [shareFile, setShareFile] = useState<FileItem | null>(null);
   const [copiedFileId, setCopiedFileId] = useState<string | null>(null);
   const [copyErrorId, setCopyErrorId] = useState<string | null>(null);
 
@@ -529,25 +534,36 @@ export default function DashboardPage() {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs ${
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
                           file.visibility === 'private'
                             ? 'bg-gray-100 text-gray-700'
                             : 'bg-green-100 text-green-700'
                         }`}
                       >
-                        {file.visibility === 'private' ? 'Privé' : 'Public'}
+                        {file.visibility === 'private' ? (
+                          <><Lock className="w-3 h-3" /> Privé</>
+                        ) : (
+                          <><Globe className="w-3 h-3" /> Public</>
+                        )}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">{formatSize(file.size)}</td>
                     <td className="px-4 py-3 text-right text-sm">
                       <div className="flex items-center justify-end gap-2">
                         <button
+                          onClick={() => setShareFile(file)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-purple-700 bg-purple-50 border border-purple-100 rounded-lg hover:bg-purple-100"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          Partager
+                        </button>
+                        <button
                           onClick={() => handleCopySignedUrl(file)}
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100"
                           disabled={signedUrlMutation.isPending && signedUrlMutation.variables === file.id}
                         >
                           <LinkIcon className="w-4 h-4" />
-                          Copier URL
+                          URL temp.
                         </button>
                         <button
                           onClick={() => setDetailsFileId(file.id)}
@@ -629,6 +645,13 @@ export default function DashboardPage() {
             setDetailsFileId(null);
             queryClient.invalidateQueries({ queryKey: ['files'] });
           }}
+        />
+      )}
+
+      {shareFile && (
+        <ShareModal
+          file={shareFile}
+          onClose={() => setShareFile(null)}
         />
       )}
     </div>

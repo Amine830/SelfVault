@@ -2,6 +2,7 @@ import { Router } from 'express';
 import userRoutes from './user.routes';
 import categoryRoutes from './category.routes';
 import fileRoutes from './file.routes';
+import shareRoutes from './share.routes';
 
 const router = Router();
 
@@ -11,6 +12,9 @@ const router = Router();
 router.use('/', userRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/files', fileRoutes);
+
+// Routes de partage (inclut routes authentifiées et publiques)
+router.use('/', shareRoutes);
 
 // Route de santé
 router.get('/health', (_req, res) => {

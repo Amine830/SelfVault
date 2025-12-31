@@ -23,24 +23,32 @@ model User {
 }
 
 model File {
-  id              String   @id @default(uuid())
-  ownerId         String   @map("owner_id")
+  id              String    @id @default(uuid())
+  ownerId         String    @map("owner_id")
   filename        String
-  storagePath     String   @map("storage_path")
-  storageProvider String   @map("storage_provider")
+  storagePath     String    @map("storage_path")
+  storageProvider String    @map("storage_provider")
   mimetype        String?
   size            BigInt
   sha256          String
-  visibility      String   @default("private")
-  categoryId      Int?     @map("category_id")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  visibility      String    @default("private")
+  categoryId      Int?      @map("category_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Champs pour le partage
+  shareToken      String?   @unique @map("share_token")
+  shareExpiresAt  DateTime? @map("share_expires_at")
+  sharePassword   String?   @map("share_password")
+  shareDownloads  Int       @default(0) @map("share_downloads")
+  shareMaxDownloads Int?    @map("share_max_downloads")
 
   owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([ownerId])
   @@index([categoryId])
+  @@index([shareToken])
   @@map("files")
 }
 

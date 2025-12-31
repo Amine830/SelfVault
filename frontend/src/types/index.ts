@@ -22,6 +22,11 @@ export interface File {
   createdAt: string | Record<string, never>;
   updatedAt: string | Record<string, never>;
   category: Category | null;
+  // Champs de partage
+  shareToken?: string | null;
+  shareExpiresAt?: string | null;
+  shareDownloads?: number;
+  shareMaxDownloads?: number | null;
 }
 
 // Types pour les catégories
@@ -78,4 +83,31 @@ export interface FileUpdateRequest {
   filename?: string;
   visibility?: 'private' | 'public';
   categoryId?: number | null;
+}
+
+// Types pour le partage
+export interface ShareOptions {
+  expiresIn?: number; // Durée en secondes
+  password?: string;
+  maxDownloads?: number;
+}
+
+export interface ShareInfo {
+  shared: boolean;
+  shareToken?: string;
+  shareUrl?: string;
+  expiresAt?: string | null;
+  hasPassword?: boolean;
+  maxDownloads?: number | null;
+  downloads?: number;
+}
+
+export interface PublicFileInfo {
+  id: string;
+  filename: string;
+  mimetype: string | null;
+  size: string;
+  createdAt: string;
+  hasPassword: boolean;
+  ownerUsername: string | null;
 }
