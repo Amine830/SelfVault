@@ -16,6 +16,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { toast } from '../store/toastStore';
 import {
   listFiles,
   uploadFile as uploadFileApi,
@@ -51,13 +52,9 @@ export default function DashboardPage() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#0ea5e9');
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryFeedback, setCategoryFeedback] = useState<string | null>(null);
-  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [detailsFileId, setDetailsFileId] = useState<string | null>(null);
   const [shareFile, setShareFile] = useState<FileItem | null>(null);
-  const [copiedFileId, setCopiedFileId] = useState<string | null>(null);
-  const [copyErrorId, setCopyErrorId] = useState<string | null>(null);
 
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
@@ -90,14 +87,26 @@ export default function DashboardPage() {
       });
     },
     onSuccess: () => {
+      toast.success('Fichier uploadé', 'Votre fichier a été uploadé avec succès.');
       setSelectedFile(null);
       queryClient.invalidateQueries({ queryKey: ['files'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+    onError: () => {
+      toast.error('Erreur d\'upload', 'Impossible d\'uploader le fichier. Vérifiez votre quota.');
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteFile(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['files'] }),
+    onSuccess: () => {
+      toast.success('Fichier supprimé', 'Le fichier a été supprimé définitivement.');
+      queryClient.invalidateQueries({ queryKey: ['files'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+    onError: () => {
+      toast.error('Erreur', 'Impossible de supprimer le fichier.');
+    },
   });
 
   const createCategoryMutation = useMutation({
@@ -106,12 +115,10 @@ export default function DashboardPage() {
       setNewCategoryName('');
       setNewCategoryColor('#0ea5e9');
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      setCategoryFeedback('Catégorie créée.');
-      window.setTimeout(() => setCategoryFeedback(null), 2000);
-      setCategoryError(null);
+      toast.success('Catégorie créée', `La catégorie "${newCategoryName}" a été créée.`);
     },
     onError: () => {
-      setCategoryError('Impossible de créer la catégorie (vérifiez le nom).');
+      toast.error('Erreur', 'Impossible de créer la catégorie (vérifiez le nom).');
     },
   });
 
@@ -121,12 +128,10 @@ export default function DashboardPage() {
     onSuccess: () => {
       setEditingCategory(null);
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-      setCategoryFeedback('Catégorie mise à jour.');
-      window.setTimeout(() => setCategoryFeedback(null), 2000);
-      setCategoryError(null);
+      toast.success('Catégorie modifiée', 'La catégorie a été mise à jour.');
     },
     onError: () => {
-      setCategoryError('Échec de la mise à jour de la catégorie.');
+      toast.error('Erreur', 'Échec de la mise à jour de la catégorie.');
     },
   });
 
@@ -138,26 +143,20 @@ export default function DashboardPage() {
       }
       queryClient.invalidateQueries({ queryKey: ['categories'] });
       queryClient.invalidateQueries({ queryKey: ['files'] });
-      setCategoryFeedback('Catégorie supprimée.');
-      window.setTimeout(() => setCategoryFeedback(null), 2000);
-      setCategoryError(null);
+      toast.success('Catégorie supprimée', 'La catégorie a été supprimée.');
     },
     onError: () => {
-      setCategoryError('Impossible de supprimer la catégorie.');
+      toast.error('Erreur', 'Impossible de supprimer la catégorie.');
     },
   });
 
   const signedUrlMutation = useMutation({
     mutationFn: (id: string) => getFileUrl(id),
-    onSuccess: (_data, id) => {
-      setCopiedFileId(id);
-      window.setTimeout(() => setCopiedFileId((current) => (current === id ? null : current)), 2500);
-      setCopyErrorId(null);
+    onSuccess: () => {
+      toast.success('Lien copié', 'Le lien signé a été copié dans le presse-papiers.');
     },
-    onError: (_error, id) => {
-      setCopyErrorId(id);
-      window.setTimeout(() => setCopyErrorId((current) => (current === id ? null : current)), 2500);
-      setCopiedFileId(null);
+    onError: () => {
+      toast.error('Erreur', 'Impossible de générer le lien signé.');
     },
   });
 
@@ -168,6 +167,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     await logout();
+    toast.info('Déconnexion', 'Vous avez été déconnecté.');
     navigate('/login');
   };
 
@@ -180,10 +180,16 @@ export default function DashboardPage() {
   };
 
   const handleDownload = async (file: FileItem) => {
-    await downloadFile(file.id, file.filename);
+    try {
+      await downloadFile(file.id, file.filename);
+      toast.success('Téléchargement', `"${file.filename}" téléchargé avec succès.`);
+    } catch {
+      toast.error('Erreur', 'Impossible de télécharger le fichier.');
+    }
   };
 
   const handleDelete = async (file: FileItem) => {
+    if (!window.confirm(`Supprimer "${file.filename}" ?`)) return;
     await deleteMutation.mutateAsync(file.id);
   };
 
@@ -381,18 +387,6 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
-
-          {(categoryFeedback || categoryError) && (
-            <div
-              className={`mt-3 rounded-lg px-3 py-2 text-xs ${
-                categoryFeedback 
-                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' 
-                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
-              }`}
-            >
-              {categoryFeedback || categoryError}
-            </div>
-          )}
 
           <div className="mt-6">
             <h3 className="text-sm font-semibold text-gray-800 dark:text-zinc-200 mb-3">Catégories</h3>
@@ -607,13 +601,6 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
-
-          {(copiedFileId || copyErrorId) && (
-            <div className="border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-3 text-sm">
-              {copiedFileId && <span className="text-green-600 dark:text-green-400">Lien copié dans le presse-papiers (valide 1h).</span>}
-              {copyErrorId && <span className="text-red-600 dark:text-red-400">Impossible de copier le lien pour ce fichier.</span>}
-            </div>
-          )}
 
           <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
             <span className="text-xs text-gray-500 dark:text-zinc-400">Page {page} / {totalPages}</span>

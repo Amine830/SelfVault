@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Save } from 'lucide-react';
 import { getFile, updateFile } from '../../api/files';
+import { toast } from '../../store/toastStore';
 import type { Category, File as FileItem } from '../../types';
 
 interface FileDetailsModalProps {
@@ -52,7 +53,11 @@ export default function FileDetailsModal({ fileId, categories, onClose, onUpdate
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['file', fileId] });
       await queryClient.invalidateQueries({ queryKey: ['files'] });
+      toast.success('Fichier modifié', 'Les informations du fichier ont été mises à jour.');
       onUpdated();
+    },
+    onError: () => {
+      toast.error('Erreur', 'Impossible de modifier le fichier.');
     },
   });
 

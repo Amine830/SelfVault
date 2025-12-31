@@ -14,6 +14,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { createShareLink, getShareInfo, revokeShareLink } from '../../api/share';
+import { toast } from '../../store/toastStore';
 import type { File as FileItem, ShareOptions } from '../../types';
 
 interface ShareModalProps {
@@ -42,6 +43,10 @@ export default function ShareModal({ file, onClose }: ShareModalProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shareInfo', file.id] });
       queryClient.invalidateQueries({ queryKey: ['files'] });
+      toast.success('Lien créé', 'Le lien de partage a été créé avec succès.');
+    },
+    onError: () => {
+      toast.error('Erreur', 'Impossible de créer le lien de partage.');
     },
   });
 
@@ -50,6 +55,10 @@ export default function ShareModal({ file, onClose }: ShareModalProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shareInfo', file.id] });
       queryClient.invalidateQueries({ queryKey: ['files'] });
+      toast.success('Lien révoqué', 'Le lien de partage a été désactivé.');
+    },
+    onError: () => {
+      toast.error('Erreur', 'Impossible de révoquer le lien de partage.');
     },
   });
 
@@ -85,6 +94,7 @@ export default function ShareModal({ file, onClose }: ShareModalProps) {
     if (shareInfo?.shareUrl) {
       await navigator.clipboard.writeText(shareInfo.shareUrl);
       setCopied(true);
+      toast.success('Copié !', 'Le lien a été copié dans le presse-papiers.');
       setTimeout(() => setCopied(false), 2000);
     }
   };

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { toast } from '../store/toastStore';
 import { Lock, Mail, LogIn } from 'lucide-react';
 import ThemeToggle from '../components/common/ThemeToggle';
 
@@ -16,9 +17,10 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
+      toast.success('Connexion réussie', 'Bienvenue sur SelfVault !');
       navigate('/dashboard');
     } catch (err) {
-      // L'erreur est déjà gérée dans le store
+      toast.error('Erreur de connexion', 'Email ou mot de passe incorrect.');
       console.error('Login failed:', err);
     }
   };

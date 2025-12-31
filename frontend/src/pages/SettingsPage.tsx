@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { toast } from '../store/toastStore';
 import { getSettings, updateSettings, updateProfile } from '../api/user';
 import ThemeToggle from '../components/common/ThemeToggle';
 
@@ -25,8 +26,6 @@ export default function SettingsPage() {
   const [username, setUsername] = useState(user?.username ?? '');
   const [storageLimitGb, setStorageLimitGb] = useState('1.00');
   const [preferencesText, setPreferencesText] = useState('{}');
-  const [feedback, setFeedback] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const settingsQuery = useQuery({
     queryKey: ['settings'],
@@ -48,12 +47,10 @@ export default function SettingsPage() {
     mutationFn: () => updateProfile({ username: username || null }),
     onSuccess: async () => {
       await fetchUser();
-      setFeedback('Profil mis à jour.');
-      setError(null);
-      window.setTimeout(() => setFeedback(null), 2000);
+      toast.success('Profil mis à jour', 'Vos informations ont été enregistrées.');
     },
     onError: () => {
-      setError('Impossible de mettre à jour le profil.');
+      toast.error('Erreur', 'Impossible de mettre à jour le profil.');
     },
   });
 
@@ -70,12 +67,10 @@ export default function SettingsPage() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['settings'] });
-      setFeedback('Paramètres enregistrés.');
-      setError(null);
-      window.setTimeout(() => setFeedback(null), 2000);
+      toast.success('Paramètres enregistrés', 'Vos paramètres ont été sauvegardés.');
     },
     onError: (mutationError) => {
-      setError(mutationError instanceof Error ? mutationError.message : 'Erreur lors de la sauvegarde.');
+      toast.error('Erreur', mutationError instanceof Error ? mutationError.message : 'Erreur lors de la sauvegarde.');
     },
   });
 
@@ -115,18 +110,6 @@ export default function SettingsPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        {(feedback || error) && (
-          <div
-            className={`rounded-lg px-4 py-3 text-sm ${
-              feedback 
-                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-100 dark:border-green-800' 
-                : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-100 dark:border-red-800'
-            }`}
-          >
-            {feedback || error}
-          </div>
-        )}
-
         <section className="bg-white dark:bg-zinc-900 rounded-xl shadow dark:shadow-black/20 p-6 border border-transparent dark:border-zinc-800">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Profil</h2>
           <p className="text-sm text-gray-500 dark:text-zinc-400">Mettre à jour votre nom d'utilisateur.</p>

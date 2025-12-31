@@ -7,6 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import SettingsPage from './pages/SettingsPage';
 import SharedFilePage from './pages/SharedFilePage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import ToastContainer from './components/common/ToastContainer';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 
@@ -63,6 +64,8 @@ function App() {
               {/* Redirection racine vers login */}
               <Route path="/" element={<Navigate to="/login" replace />} />
             
+            {/* Toast notifications */}
+            
             {/* Routes publiques */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -87,6 +90,8 @@ function App() {
             />
           </Routes>
         </BrowserRouter>
+        {/* Toast notifications - en dehors du router pour être toujours visible */}
+        <ToastContainer />
       </AuthInitializer>
     </ThemeProvider>
     </QueryClientProvider>

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { toast } from '../store/toastStore';
 import { Lock, Mail, User, UserPlus } from 'lucide-react';
 import ThemeToggle from '../components/common/ThemeToggle';
 
@@ -17,8 +18,10 @@ export default function RegisterPage() {
 
     try {
       await register(email, password, username || undefined);
+      toast.success('Compte créé', 'Votre compte a été créé avec succès !');
       navigate('/dashboard');
     } catch (err) {
+      toast.error('Erreur d\'inscription', 'Impossible de créer le compte. Vérifiez vos informations.');
       console.error('Register failed:', err);
     }
   };
