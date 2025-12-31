@@ -10,6 +10,11 @@ Backend API pour SelfVault - Solution de stockage de fichiers auto-hébergée av
 - **Catégorisation** : Organisation des fichiers par catégories
 - **Déduplication** : Détection via hash SHA256
 - **URLs signées** : Accès temporaire sécurisé (1h)
+- **Partage de fichiers** : Liens de partage avec options avancées
+  - Expiration configurable (1h, 24h, 7 jours, 30 jours, jamais)
+  - Protection par mot de passe optionnelle
+  - Limite de téléchargements
+  - Révocation à tout moment
 - **API REST** : Architecture MVC avec validation Zod
 - **Logging structuré** : Pino avec rotation
 - **Rate limiting** : Protection anti-abus
@@ -212,6 +217,30 @@ GET    /api/files/:id/url        Obtenir une URL signée
 PATCH  /api/files/:id            Mettre à jour les métadonnées
 DELETE /api/files/:id            Supprimer un fichier
 ```
+
+**Paramètres de requête pour `/api/files`** :
+
+### Partage de fichiers
+
+```
+POST   /api/files/:id/share      Créer un lien de partage
+GET    /api/files/:id/share      Obtenir les infos de partage
+DELETE /api/files/:id/share      Révoquer le lien de partage
+```
+
+**Endpoints publics de partage (sans authentification)** :
+
+```
+GET    /api/share/:token/info    Infos publiques du fichier partagé
+GET    /api/share/:token/download Télécharger via lien de partage
+POST   /api/share/:token/url     Obtenir URL signée (avec mot de passe si requis)
+GET    /api/public/files         Liste des fichiers publics
+```
+
+**Options de partage** :
+- `expiresIn` : Durée de validité (1h, 24h, 7d, 30d, never)
+- `password` : Mot de passe optionnel pour protéger le lien
+- `maxDownloads` : Nombre maximum de téléchargements autorisés
 
 **Paramètres de requête pour `/api/files`** :
 - `page` : Numéro de page (défaut: 1)

@@ -29,6 +29,12 @@
 - Organisation par catégories
 - Gestion des métadonnées (nom, taille, type MIME, hash SHA256)
 - Contrôle de visibilité (privé/public/partagé)
+- **Partage de fichiers avancé** :
+  - Génération de liens de partage uniques
+  - Expiration configurable (1h, 24h, 7 jours, 30 jours, jamais)
+  - Protection par mot de passe optionnelle
+  - Limite de téléchargements
+  - Révocation instantanée
 - Quotas de stockage par utilisateur
 - API REST complète
 - Interface web moderne (React + TailwindCSS)
@@ -199,6 +205,16 @@ npm test
 - `GET /files/:id/download` - Télécharger un fichier
 - `PATCH /files/:id` - Modifier métadonnées
 - `DELETE /files/:id` - Supprimer un fichier
+
+#### Partage
+
+- `POST /files/:id/share` - Créer un lien de partage
+- `GET /files/:id/share` - Infos de partage d'un fichier
+- `DELETE /files/:id/share` - Révoquer le lien de partage
+- `GET /share/:token/info` - Infos publiques (sans auth)
+- `GET /share/:token/download` - Télécharger via lien (sans auth)
+- `POST /share/:token/url` - Obtenir URL signée (sans auth)
+- `GET /public/files` - Liste des fichiers publics
 
 #### Catégories
 
