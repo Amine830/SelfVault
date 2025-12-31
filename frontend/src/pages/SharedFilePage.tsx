@@ -56,11 +56,18 @@ export default function SharedFilePage() {
         await downloadSharedFile(token);
       }
     },
-    onError: (error: Error) => {
-      if (error.message.includes('401') || error.message.includes('password')) {
+    onError: (error: unknown) => {
+      // Vérifier le code d'erreur Axios
+      const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
+      const status = axiosError.response?.status;
+      const message = axiosError.response?.data?.message || (error as Error).message || '';
+      
+      if (status === 401 || message.toLowerCase().includes('password') || message.toLowerCase().includes('mot de passe')) {
         setDownloadError('Mot de passe incorrect');
-      } else if (error.message.includes('410')) {
+      } else if (status === 410 || message.includes('expired') || message.includes('limit')) {
         setDownloadError('Ce lien a expiré ou la limite de téléchargements a été atteinte');
+      } else if (status === 404) {
+        setDownloadError('Ce lien de partage n\'existe pas');
       } else {
         setDownloadError('Erreur lors du téléchargement');
       }

@@ -54,8 +54,12 @@ export const downloadSharedFile = async (shareToken: string, password?: string):
     }
   }
 
-  // Créer un lien de téléchargement
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+  // Récupérer le type MIME pour la bonne extension
+  const contentType = response.headers['content-type'] || 'application/octet-stream';
+
+  // Créer un lien de téléchargement avec le bon type MIME
+  const blob = new Blob([response.data], { type: contentType });
+  const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.setAttribute('download', filename);
@@ -89,8 +93,12 @@ export const downloadSharedFileWithPassword = async (
     }
   }
 
-  // Créer un lien de téléchargement
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+  // Récupérer le type MIME pour la bonne extension
+  const contentType = response.headers['content-type'] || 'application/octet-stream';
+
+  // Créer un lien de téléchargement avec le bon type MIME
+  const blob = new Blob([response.data], { type: contentType });
+  const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.setAttribute('download', filename);

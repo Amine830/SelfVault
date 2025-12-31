@@ -30,9 +30,15 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     // Si 401, le token est invalide ou expiré
+    // Exception: ne pas rediriger pour les routes de partage public
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      const url = error.config?.url || '';
+      const isPublicShareRoute = url.includes('/share/') || url.includes('/public/');
+      
+      if (!isPublicShareRoute) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
