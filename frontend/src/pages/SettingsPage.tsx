@@ -5,6 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { toast } from '../store/toastStore';
 import { getSettings, updateSettings, updateProfile } from '../api/user';
 import ThemeToggle from '../components/common/ThemeToggle';
+import { useMemo } from 'react';
 
 const bytesToGigabytes = (value: string) => {
   const numeric = Number(value);
@@ -206,3 +207,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+

@@ -96,8 +96,10 @@ function validateConfig(): Config {
       forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
     },
     upload: {
-      maxSizeBytes: parseInt(process.env.MAX_UPLOAD_SIZE_BYTES || '10485760', 10),
-      maxStoragePerUserBytes: parseInt(process.env.MAX_STORAGE_PER_USER_BYTES || '1073741824', 10),
+      // 100 MB par fichier par défaut (configurable via MAX_UPLOAD_SIZE_BYTES)
+      maxSizeBytes: parseInt(process.env.MAX_UPLOAD_SIZE_BYTES || '104857600', 10),
+      // 5 GB de stockage par utilisateur par défaut
+      maxStoragePerUserBytes: parseInt(process.env.MAX_STORAGE_PER_USER_BYTES || '5368709120', 10),
     },
     cors: {
       allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || [

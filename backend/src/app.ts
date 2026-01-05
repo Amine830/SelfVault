@@ -51,9 +51,9 @@ export function createApp(): Application {
   // Compression des réponses
   app.use(compression());
 
-  // Parsing des requêtes
-  app.use(express.json({ limit: '1mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+  // Parsing des requêtes (limite augmentée pour les gros fichiers)
+  app.use(express.json({ limit: '100mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
   // Middlewares custom
   app.use(requestLogger);
