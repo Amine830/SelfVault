@@ -1,6 +1,6 @@
 # Frontend — SelfVault
 
-Le frontend de SelfVault est une application React (Vite + TypeScript) qui consomme l'API backend et utilise Supabase côté client pour l'authentification et le stockage. Ce README donne les informations minimales pour démarrer et contribuer côté interface.
+Le frontend de SelfVault est une application React (Vite + TypeScript) qui consomme l'API backend. L'authentification est abstraite pour supporter plusieurs providers (Supabase ou Local). Ce README donne les informations minimales pour démarrer et contribuer côté interface.
 
 ## Prérequis
 
@@ -12,9 +12,28 @@ Le frontend de SelfVault est une application React (Vite + TypeScript) qui conso
 
 Le frontend attend les variables suivantes (préfixées par `VITE_`) :
 
-- `VITE_SUPABASE_URL` — URL du projet Supabase
-- `VITE_SUPABASE_ANON_KEY` — clé publique (anon) Supabase
+### Obligatoires
 - `VITE_API_URL` — URL du backend (ex. `http://localhost:8080`)
+
+### Optionnelles (selon la configuration)
+- `VITE_AUTH_PROVIDER` — Provider d'auth (`supabase` ou `local`). Auto-détecté si non défini.
+- `VITE_SUPABASE_URL` — URL du projet Supabase (si auth Supabase)
+- `VITE_SUPABASE_ANON_KEY` — clé publique (anon) Supabase (si auth Supabase)
+
+### Exemples de configuration
+
+#### Full Supabase
+```env
+VITE_API_URL=http://localhost:8080
+VITE_SUPABASE_URL=https://your_url_here.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+```
+
+#### Full Self-Hosted (Local Auth)
+```env
+VITE_API_URL=http://localhost:8080
+VITE_AUTH_PROVIDER=local
+```
 
 Installez et configurez ces variables (par exemple dans un fichier `.env.local` ou via votre gestionnaire d'environnement). Reportez-vous également au fichier `.env.example` à la racine du dépôt pour les exemples de valeurs.
 

@@ -4,9 +4,14 @@ Backend API pour SelfVault - Solution de stockage de fichiers auto-hébergée av
 
 ## Fonctionnalités
 
-- **Authentification JWT** via Supabase Auth
+- **Authentification flexible** :
+  - Supabase Auth (social login, email verification) - par défaut
+  - Auth locale (JWT + bcrypt) - totalement autonome
 - **Gestion de fichiers** : Upload, download, mise à jour, suppression
-- **Stockage flexible** : Supabase Storage ou local (adaptateur)
+- **Stockage flexible** :
+  - Supabase Storage (par défaut)
+  - Stockage local (système de fichiers)
+  - S3/MinIO (compatible AWS S3)
 - **Catégorisation** : Organisation des fichiers par catégories
 - **Déduplication** : Détection via hash SHA256
 - **URLs signées** : Accès temporaire sécurisé (1h)
@@ -25,10 +30,10 @@ Backend API pour SelfVault - Solution de stockage de fichiers auto-hébergée av
 - **Runtime** : Node.js 18+
 - **Language** : TypeScript (strict mode)
 - **Framework** : Express.js
-- **ORM** : Prisma
-- **Base de données** : PostgreSQL (Supabase)
-- **Stockage** : Supabase Storage
-- **Authentification** : Supabase Auth (JWT)
+- **ORM** : Prisma (PostgreSQL, MySQL, SQLite)
+- **Base de données** : PostgreSQL, MySQL, ou SQLite
+- **Stockage** : Supabase Storage, S3/MinIO, ou Local
+- **Authentification** : Supabase Auth ou JWT local (bcrypt)
 - **Validation** : Zod
 - **Upload** : Multer
 - **Logging** : Pino
@@ -39,8 +44,8 @@ Backend API pour SelfVault - Solution de stockage de fichiers auto-hébergée av
 ### Prérequis
 
 - Node.js 18+ et npm
-- Compte Supabase
-- PostgreSQL (via Supabase)
+- Base de données (PostgreSQL, MySQL, ou SQLite pour dev)
+- (Optionnel) Compte Supabase si vous utilisez leur auth/storage
 
 ### 1. Cloner et installer
 
@@ -50,12 +55,20 @@ cd SelfVault/backend
 npm install
 ```
 
-### 2. Configuration Supabase
+### 2. Configuration
 
+Choisissez votre configuration selon vos besoins :
+
+#### Option A : Full Supabase (recommandé pour démarrer)
 Créer un projet sur [Supabase](https://supabase.com) et récupérer :
 - URL du projet
 - Clé `anon` (public)
 - Clé `service_role` (privée)
+
+#### Option B : Full Self-Hosted (aucune dépendance externe)
+- PostgreSQL ou MySQL local
+- MinIO ou stockage local
+- Auth locale (JWT)
 
 ### 3. Variables d'environnement
 

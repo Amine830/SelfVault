@@ -7,7 +7,6 @@
 ![Vite](https://img.shields.io/badge/Vite-4.0-brightgreen)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-teal)
 ![Prisma](https://img.shields.io/badge/Prisma-4.0-blueviolet)
-![Supabase](https://img.shields.io/badge/Supabase-%23FF4D4D.svg?logo=supabase&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-blue)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-blue)
 ![Jest](https://img.shields.io/badge/Jest-testing-red)
@@ -19,16 +18,24 @@
 - **Open-source** et **auto-hébergeable**
 - **BYOI** : vous contrôlez votre infrastructure
 - **Sécurité** : chiffrement, authentification robuste, bonnes pratiques
-- **Portable** : architecture modulaire permettant le changement de DB/stockage
-- **V1** : utilise Supabase (Postgres + Storage + Auth) par défaut
+- **Portable** : architecture modulaire permettant le changement de DB/stockage/auth
+- **Aucune dépendance obligatoire** : fonctionne sans service externe (Supabase, AWS, etc.)
+
+> **"Supabase is a default provider, not a requirement."**
 
 ## Fonctionnalités
 
-- Authentification sécurisée (Supabase Auth)
+- **Authentification flexible** :
+  - Supabase Auth (social login, email verification) - par défaut
+  - Auth locale (JWT + bcrypt) - totalement autonome
 - Upload/Download de fichiers
 - Organisation par catégories
 - Gestion des métadonnées (nom, taille, type MIME, hash SHA256)
 - Contrôle de visibilité (privé/public/partagé)
+- **Stockage flexible** :
+  - Supabase Storage (par défaut)
+  - Local (système de fichiers)
+  - S3/MinIO (compatible AWS S3)
 - **Partage de fichiers avancé** :
   - Génération de liens de partage uniques
   - Expiration configurable (1h, 24h, 7 jours, 30 jours, jamais)
@@ -46,11 +53,26 @@
 ```text
 SelfVault/
 ├── backend/           # API REST (Node.js + Express + TypeScript + Prisma)
+│   └── src/
+│       ├── auth/      # Providers d'authentification (Supabase, Local)
+│       └── adapters/  # Adaptateurs de stockage (Supabase, S3, Local)
 ├── frontend/          # Interface web (React + Vite + TypeScript + TailwindCSS)
+│   └── src/
+│       └── services/auth/  # Services d'auth abstrait
+├── docs/              # Documentation détaillée
 ├── docker-compose.yml # Configuration Docker pour dev
 ├── .env.example       # Template des variables d'environnement
 └── README.md          # Ce fichier
 ```
+
+## Configurations possibles
+
+| Configuration | Auth | Storage | Database | Dépendances externes |
+|---------------|------|---------|----------|---------------------|
+| **Full Supabase** | Supabase | Supabase | PostgreSQL (Supabase) | Supabase |
+| **Full Self-Hosted** | Local | S3/MinIO | PostgreSQL/MySQL | Aucune |
+| **Hybride** | Supabase | S3/MinIO | PostgreSQL | Supabase (auth only) |
+| **Dev Local** | Local | Local | SQLite | Aucune |
 
 ## Prochaines étapes
 
@@ -58,7 +80,8 @@ Quelques tâches planifiées pour les prochaines versions — voir `NEXT_STEPS.m
 
 - Ajouter un `docker-compose.prod.yml` d'exemple pour la production
 - Créer workflows CI (lint / test / build)
-- Implémenter un adaptateur S3/MinIO pour supporter un stockage BYOI
+- ~~Implémenter un adaptateur S3/MinIO pour supporter un stockage BYOI~~ ✅
+- ~~Implémenter l'authentification locale (sans Supabase)~~ ✅
 - Ajouter guide `MIGRATION.md` et exemples Nginx / Let's Encrypt
 
 
@@ -68,8 +91,9 @@ Quelques tâches planifiées pour les prochaines versions — voir `NEXT_STEPS.m
 
 - Node.js + TypeScript
 - Express.js (API REST)
-- Prisma (ORM)
-- Supabase (Auth + Storage + Postgres)
+- Prisma (ORM multi-DB : PostgreSQL, MySQL, SQLite)
+- Auth abstrait : Supabase Auth ou JWT local
+- Storage abstrait : Supabase, S3/MinIO, Local
 - Jest + Supertest (tests)
 
 **Frontend :**
