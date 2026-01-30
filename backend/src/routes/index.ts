@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
 import categoryRoutes from './category.routes';
 import fileRoutes from './file.routes';
@@ -9,6 +10,10 @@ const router = Router();
 /**
  * Routes principales de l'API
  */
+
+// Routes d'authentification (login, register, logout, refresh)
+router.use('/auth', authRoutes);
+
 router.use('/', userRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/files', fileRoutes);
