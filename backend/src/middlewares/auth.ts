@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { createClient } from '@supabase/supabase-js';
-import { config } from '../config';
+import { authProvider } from '../auth';
 import { AppError } from '../utils/errors';
 import { logger } from '../utils/logger';
 
@@ -16,7 +15,7 @@ export interface AuthenticatedRequest extends Request {
 
 /**
  * Middleware d'authentification
- * Vérifie le JWT Supabase dans le header Authorization
+ * Vérifie le JWT via le provider d'auth configuré (Supabase ou Local)
  */
 export const authenticate = async (
   req: AuthenticatedRequest,
@@ -32,23 +31,18 @@ export const authenticate = async (
 
     const token = authHeader.substring(7);
 
-    // Créer un client Supabase pour vérifier le token
-    const supabase = createClient(config.supabase.url, config.supabase.anonKey);
+    // Vérifier le token via le provider d'auth abstrait
+    const user = await authProvider.verifyToken(token);
 
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser(token);
-
-    if (error || !user) {
-      logger.warn('Authentication failed:', error?.message);
+    if (!user) {
+      logger.warn('Authentication failed: invalid or expired token');
       throw new AppError('Invalid or expired token', 401);
     }
 
     // Ajouter l'utilisateur à la requête
     req.user = {
       id: user.id,
-      email: user.email || '',
+      email: user.email,
     };
 
     next();
@@ -79,16 +73,12 @@ export const optionalAuth = async (
     }
 
     const token = authHeader.substring(7);
-    const supabase = createClient(config.supabase.url, config.supabase.anonKey);
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser(token);
+    const user = await authProvider.verifyToken(token);
 
     if (user) {
       req.user = {
         id: user.id,
-        email: user.email || '',
+        email: user.email,
       };
     }
 

@@ -6,6 +6,9 @@ dotenv.config();
 interface Config {
   port: number;
   nodeEnv: string;
+  auth: {
+    provider: 'supabase' | 'local';
+  };
   supabase: {
     url: string;
     anonKey: string;
@@ -50,11 +53,18 @@ interface Config {
 function validateConfig(): Config {
   const storageProvider =
     (process.env.STORAGE_PROVIDER as 'supabase' | 'local' | 's3') || 'supabase';
+  const authProvider = (process.env.AUTH_PROVIDER as 'supabase' | 'local') || 'supabase';
 
-  // Variables requises selon le provider
+  // Variables requises de base
   const requiredEnvVars: string[] = ['DATABASE_URL', 'DIRECT_URL', 'JWT_SECRET'];
 
-  if (storageProvider === 'supabase') {
+  // Variables requises si auth Supabase
+  if (authProvider === 'supabase') {
+    requiredEnvVars.push('SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_KEY');
+  }
+
+  // Variables requises si stockage Supabase (et auth non-Supabase)
+  if (storageProvider === 'supabase' && authProvider !== 'supabase') {
     requiredEnvVars.push('SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_KEY');
   }
 
@@ -68,9 +78,13 @@ function validateConfig(): Config {
     }
   }
 
+
   return {
     port: parseInt(process.env.PORT || '8080', 10),
     nodeEnv: process.env.NODE_ENV || 'development',
+    auth: {
+      provider: authProvider,
+    },
     supabase: {
       url: process.env.SUPABASE_URL || '',
       anonKey: process.env.SUPABASE_ANON_KEY || '',
