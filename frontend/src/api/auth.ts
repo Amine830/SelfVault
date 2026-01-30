@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { authService } from '../services/auth';
 import { apiClient } from './client';
 import type { User } from '../types';
 
@@ -14,55 +14,42 @@ export interface RegisterData {
 }
 
 /**
- * Connexion avec Supabase Auth
+ * Connexion avec le service d'auth abstrait
+ * Utilise automatiquement Supabase ou Local selon la configuration
  */
 export const login = async (credentials: LoginCredentials) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: credentials.email,
-    password: credentials.password,
-  });
-
-  if (error) throw error;
-
-  // Stocker le token JWT
-  if (data.session?.access_token) {
-    localStorage.setItem('token', data.session.access_token);
-  }
-
-  return data;
+  const result = await authService.login(credentials.email, credentials.password);
+  return {
+    user: result.user,
+    session: {
+      access_token: result.tokens.accessToken,
+    },
+  };
 };
 
 /**
- * Inscription avec Supabase Auth
+ * Inscription avec le service d'auth abstrait
  */
 export const register = async (userData: RegisterData) => {
-  const { data, error } = await supabase.auth.signUp({
-    email: userData.email,
-    password: userData.password,
-    options: {
-      data: {
-        username: userData.username,
-      },
-    },
-  });
-
-  if (error) throw error;
-
-  // Stocker le token JWT si la confirmation email n'est pas requise
-  if (data.session?.access_token) {
-    localStorage.setItem('token', data.session.access_token);
-  }
-
-  return data;
+  const result = await authService.register(
+    userData.email,
+    userData.password,
+    userData.username
+  );
+  return {
+    user: result.user,
+    session: result.tokens.accessToken
+      ? { access_token: result.tokens.accessToken }
+      : null,
+    emailVerificationRequired: result.emailVerificationRequired,
+  };
 };
 
 /**
  * Déconnexion
  */
 export const logout = async () => {
-  localStorage.removeItem('token');
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
+  await authService.logout();
 };
 
 /**
@@ -77,5 +64,13 @@ export const getCurrentUser = async (): Promise<User> => {
  * Vérifier si l'utilisateur est authentifié
  */
 export const isAuthenticated = (): boolean => {
-  return !!localStorage.getItem('token');
+  return authService.isAuthenticated();
 };
+
+/**
+ * Récupérer le token d'accès actuel
+ */
+export const getAccessToken = (): string | null => {
+  return authService.getAccessToken();
+};
+
