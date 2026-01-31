@@ -52,17 +52,18 @@
 
 ```text
 SelfVault/
-├── backend/           # API REST (Node.js + Express + TypeScript + Prisma)
+├── backend/                  # API REST (Node.js + Express + TypeScript + Prisma)
 │   └── src/
-│       ├── auth/      # Providers d'authentification (Supabase, Local)
-│       └── adapters/  # Adaptateurs de stockage (Supabase, S3, Local)
-├── frontend/          # Interface web (React + Vite + TypeScript + TailwindCSS)
+│       ├── auth/             # Providers d'authentification (Supabase, Local)
+│       └── adapters/         # Adaptateurs de stockage (Supabase, S3, Local)
+├── frontend/                 # Interface web (React + Vite + TypeScript + TailwindCSS)
 │   └── src/
-│       └── services/auth/  # Services d'auth abstrait
-├── docs/              # Documentation détaillée
-├── docker-compose.yml # Configuration Docker pour dev
-├── .env.example       # Template des variables d'environnement
-└── README.md          # Ce fichier
+│       └── services/auth/    # Services d'auth abstrait
+├── docs/                     # Documentation détaillée
+├── docker-compose.yml        # Développement local (PostgreSQL + MinIO + Auth local)
+├── docker-compose.prod.yml   # Production (optimisé, Nginx)
+├── .env.example              # Template des variables d'environnement
+└── README.md                 # Ce fichier
 ```
 
 ## Configurations possibles
@@ -126,7 +127,7 @@ git clone https://github.com/Amine830/SelfVault.git
 cd selfvault
 
 # 2. Lancer avec Docker (PostgreSQL + MinIO + Backend + Frontend)
-docker-compose -f docker-compose.local.yml up -d
+docker compose up -d
 
 # 3. Accéder à l'application
 # Frontend: http://localhost:5173
@@ -215,22 +216,28 @@ npm run dev
 
 ## Docker
 
-### Development (100% Local)
+### Développement (100% Local)
 
 ```bash
-# Démarre PostgreSQL + MinIO + Backend + Frontend
-docker-compose -f docker-compose.local.yml up -d
+# Démarre PostgreSQL + MinIO + Backend + Frontend avec hot-reload
+docker compose up -d
+
+# Voir les logs
+docker compose logs -f
+
+# Arrêter
+docker compose down
 ```
 
 ### Production
 
 ```bash
-# Copier et configurer l'environnement
-cp .env.docker.example .env
+# 1. Configurer l'environnement
+cp .env.example .env
 # Éditer .env avec des mots de passe sécurisés
 
-# Lancer en production
-docker-compose -f docker-compose.prod.yml up -d
+# 2. Lancer en production
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 Voir [docs/LOCAL_DEPLOYMENT.md](docs/LOCAL_DEPLOYMENT.md) pour le guide complet.

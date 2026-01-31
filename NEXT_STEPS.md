@@ -77,7 +77,7 @@
 
 ## 📁 Structure actuelle des adaptateurs
 
-```
+```text
 backend/src/adapters/
 ├── index.ts                  # Factory (switch sur STORAGE_PROVIDER)
 ├── IStorageAdapter.ts        # Interface commune
@@ -118,4 +118,4 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ---
 
-*Dernière mise à jour : 31 décembre 2025*
+*Dernière mise à jour : 31 Janvier 2026*
