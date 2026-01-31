@@ -66,6 +66,11 @@ async function startServer(): Promise<void> {
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
+    console.error('Full error details:', error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     process.exit(1);
   }
 }

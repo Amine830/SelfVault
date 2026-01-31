@@ -3,6 +3,9 @@
 # =============================================================================
 FROM node:18-alpine AS development
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl openssl-dev libc6-compat
+
 WORKDIR /app
 
 # Copier les fichiers de dépendances
@@ -29,6 +32,9 @@ CMD ["npm", "run", "dev"]
 # =============================================================================
 FROM node:18-alpine AS builder
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl openssl-dev libc6-compat
+
 WORKDIR /app
 
 # Copier les fichiers de dépendances
@@ -51,6 +57,9 @@ RUN npm run build
 # Stage 3: Production
 # =============================================================================
 FROM node:18-alpine AS production
+
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl libc6-compat
 
 WORKDIR /app
 
