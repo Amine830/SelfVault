@@ -114,16 +114,51 @@ Quelques tâches planifiées pour les prochaines versions — voir `NEXT_STEPS.m
 
 - Node.js 18+
 - Docker et Docker Compose
-- Un compte Supabase (gratuit)
+- (Optionnel) Un compte Supabase pour utiliser leur auth/storage
 
-### Configuration Supabase
+### Option A : Installation 100% Locale (Recommandé pour tester)
+
+**Aucune dépendance externe requise** - PostgreSQL + MinIO + Auth locale
+
+```bash
+# 1. Cloner le projet
+git clone https://github.com/Amine830/SelfVault.git
+cd selfvault
+
+# 2. Lancer avec Docker (PostgreSQL + MinIO + Backend + Frontend)
+docker-compose -f docker-compose.local.yml up -d
+
+# 3. Accéder à l'application
+# Frontend: http://localhost:5173
+# Backend:  http://localhost:8080
+# MinIO:    http://localhost:9001 (minioadmin/minioadmin123)
+```
+
+Créez un compte directement sur http://localhost:5173 - l'authentification est gérée localement.
+
+### Option B : Installation avec Supabase
+
+```bash
+# 1. Cloner le projet
+git clone https://github.com/Amine830/SelfVault.git
+cd selfvault
+
+# 2. Configurer Supabase
+cp .env.example .env
+# Éditez .env avec vos clés Supabase
+
+# 3. Lancer
+./install.sh && ./start.sh
+```
+
+### Configuration Supabase (si Option B)
 
 1. Créez un projet sur [supabase.com](https://supabase.com)
 2. Créez un bucket de stockage nommé `files` dans Storage
 3. Configurez les politiques d'accès (RLS)
 4. Récupérez vos clés API (Project Settings > API)
 
-### Installation locale
+### Installation manuelle (sans Docker)
 
 1. Clonez le repository :
 
@@ -180,18 +215,25 @@ npm run dev
 
 ## Docker
 
-### Development
+### Development (100% Local)
 
 ```bash
-docker-compose up -d
+# Démarre PostgreSQL + MinIO + Backend + Frontend
+docker-compose -f docker-compose.local.yml up -d
 ```
 
 ### Production
 
 ```bash
+# Copier et configurer l'environnement
+cp .env.docker.example .env
+# Éditer .env avec des mots de passe sécurisés
 
-Le dépôt fournit `docker-compose.yml` pour le développement. Un fichier `docker-compose.prod.yml` d'exemple n'est pas inclus dans cette version (voir `NEXT_STEPS.md`).
+# Lancer en production
+docker-compose -f docker-compose.prod.yml up -d
 ```
+
+Voir [docs/LOCAL_DEPLOYMENT.md](docs/LOCAL_DEPLOYMENT.md) pour le guide complet.
 
 ## Tests
 
