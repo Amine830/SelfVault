@@ -9,6 +9,9 @@ import type {
   AuthMetadata,
 } from './IAuthProvider';
 
+// Type pour les métadonnées utilisateur Supabase
+type UserMetadata = Record<string, unknown>;
+
 /**
  * Provider d'authentification Supabase
  *
@@ -18,20 +21,27 @@ import type {
  * - L'inscription et la connexion
  */
 export class SupabaseAuthProvider implements IAuthProvider {
-  private supabase: SupabaseClient;
-  private supabaseAdmin: SupabaseClient;
+  private supabase: SupabaseClient<never, 'public', never>;
+  private supabaseAdmin: SupabaseClient<never, 'public', never>;
 
   constructor() {
     // Client standard pour les opérations utilisateur
-    this.supabase = createClient(config.supabase.url, config.supabase.anonKey);
+    this.supabase = createClient<never, 'public', never>(
+      config.supabase.url,
+      config.supabase.anonKey
+    );
 
     // Client admin pour les opérations privilégiées
-    this.supabaseAdmin = createClient(config.supabase.url, config.supabase.serviceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
+    this.supabaseAdmin = createClient<never, 'public', never>(
+      config.supabase.url,
+      config.supabase.serviceKey,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
   }
 
   /**
@@ -49,15 +59,16 @@ export class SupabaseAuthProvider implements IAuthProvider {
         return null;
       }
 
+      const metadata = user.user_metadata as UserMetadata;
       return {
         id: user.id,
         email: user.email || '',
-        username: user.user_metadata?.username,
+        username: metadata?.username as string | undefined,
         emailVerified: user.email_confirmed_at !== null,
-        metadata: user.user_metadata,
+        metadata,
       };
-    } catch (error) {
-      logger.error('Error verifying token:', error);
+    } catch (err) {
+      logger.error('Error verifying token:', err);
       return null;
     }
   }
@@ -76,15 +87,16 @@ export class SupabaseAuthProvider implements IAuthProvider {
         return null;
       }
 
+      const metadata = user.user_metadata as UserMetadata;
       return {
         id: user.id,
         email: user.email || '',
-        username: user.user_metadata?.username,
+        username: metadata?.username as string | undefined,
         emailVerified: user.email_confirmed_at !== null,
-        metadata: user.user_metadata,
+        metadata,
       };
-    } catch (error) {
-      logger.error('Error getting user:', error);
+    } catch (err) {
+      logger.error('Error getting user:', err);
       return null;
     }
   }
@@ -107,13 +119,14 @@ export class SupabaseAuthProvider implements IAuthProvider {
       throw new Error('Login failed: no user or session returned');
     }
 
+    const userMetadata = data.user.user_metadata as UserMetadata;
     return {
       user: {
         id: data.user.id,
         email: data.user.email || '',
-        username: data.user.user_metadata?.username,
+        username: userMetadata?.username as string | undefined,
         emailVerified: data.user.email_confirmed_at !== null,
-        metadata: data.user.user_metadata,
+        metadata: userMetadata,
       },
       tokens: {
         accessToken: data.session.access_token,
@@ -156,13 +169,14 @@ export class SupabaseAuthProvider implements IAuthProvider {
           expiresIn: 0,
         };
 
+    const userMetadata = data.user.user_metadata as UserMetadata;
     return {
       user: {
         id: data.user.id,
         email: data.user.email || '',
         username: metadata?.username,
         emailVerified: data.user.email_confirmed_at !== null,
-        metadata: data.user.user_metadata,
+        metadata: userMetadata,
       },
       tokens,
     };

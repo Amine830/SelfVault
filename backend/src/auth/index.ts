@@ -1,5 +1,7 @@
 import { config } from '../config';
 import type { IAuthProvider } from './IAuthProvider';
+import { SupabaseAuthProvider } from './SupabaseAuthProvider';
+import { LocalAuthProvider } from './LocalAuthProvider';
 
 export type AuthProviderType = 'supabase' | 'local';
 
@@ -15,17 +17,14 @@ export function createAuthProvider(): IAuthProvider {
   const provider = config.auth.provider;
 
   switch (provider) {
-    case 'supabase': {
-      // Import dynamique pour éviter de charger Supabase si non utilisé
-      const { SupabaseAuthProvider } = require('./SupabaseAuthProvider');
+    case 'supabase':
       return new SupabaseAuthProvider();
-    }
-    case 'local': {
-      const { LocalAuthProvider } = require('./LocalAuthProvider');
+    case 'local':
       return new LocalAuthProvider();
+    default: {
+      const exhaustiveCheck: never = provider;
+      throw new Error(`Unknown auth provider: ${exhaustiveCheck as string}`);
     }
-    default:
-      throw new Error(`Unknown auth provider: ${provider}`);
   }
 }
 
@@ -33,4 +32,10 @@ export function createAuthProvider(): IAuthProvider {
 export const authProvider = createAuthProvider();
 
 // Re-export des types et interfaces
-export type { IAuthProvider, AuthUser, AuthResult, AuthTokens, AuthMetadata } from './IAuthProvider';
+export type {
+  IAuthProvider,
+  AuthUser,
+  AuthResult,
+  AuthTokens,
+  AuthMetadata,
+} from './IAuthProvider';

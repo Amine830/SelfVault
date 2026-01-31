@@ -161,7 +161,7 @@ export class AuthController {
    * GET /auth/provider - Retourne le provider d'auth configuré
    * Utile pour le frontend pour savoir quel flux utiliser
    */
-  async getProvider(_req: Request, res: Response): Promise<void> {
+  getProvider(_req: Request, res: Response): void {
     res.json({
       provider: config.auth.provider,
       // Informations supplémentaires pour le frontend

@@ -192,10 +192,11 @@ export class LocalAuthProvider implements IAuthProvider {
    * Note: En mode JWT stateless, on ne peut pas vraiment invalider le token côté serveur
    * Le client doit supprimer le token de son stockage
    */
-  async logout(_token: string): Promise<void> {
+  logout(_token: string): Promise<void> {
     // En mode JWT stateless, pas d'action serveur nécessaire
     // Pour une sécurité accrue, on pourrait implémenter une blacklist de tokens
     logger.debug('Logout requested (stateless mode)');
+    return Promise.resolve();
   }
 
   /**

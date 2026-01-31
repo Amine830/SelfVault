@@ -114,6 +114,7 @@ export class LocalAuthService implements IAuthService {
    * Pas de listener d'état en mode local (stateless)
    * Le frontend doit gérer l'état manuellement
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onAuthStateChange(_callback: (user: AuthUser | null) => void): () => void {
     // En mode local, pas de listener automatique
     // Retourne une fonction de cleanup vide
