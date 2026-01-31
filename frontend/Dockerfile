@@ -1,5 +1,32 @@
-# Stage 1: Build
+# =============================================================================
+# Stage 1: Development
+# =============================================================================
+FROM node:20-alpine AS development
+
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+
+# Installer toutes les dépendances
+RUN npm ci
+
+# Exposer le port Vite
+EXPOSE 5173
+
+# Commande par défaut pour le dev
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# =============================================================================
+# Stage 2: Build
+# =============================================================================
 FROM node:20-alpine AS builder
+
+# Build args pour les variables d'environnement Vite
+ARG VITE_API_URL
+ARG VITE_AUTH_PROVIDER
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
 
 WORKDIR /app
 
@@ -12,11 +39,13 @@ RUN npm ci
 # Copier le code source
 COPY . .
 
-# Build de production
+# Build de production avec les variables d'environnement
 RUN npm run build
 
-# Stage 2: Production avec Nginx
-FROM nginx:alpine
+# =============================================================================
+# Stage 3: Production avec Nginx
+# =============================================================================
+FROM nginx:alpine AS production
 
 # Copier la configuration nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf

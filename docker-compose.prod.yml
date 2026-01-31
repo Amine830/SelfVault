@@ -87,12 +87,15 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8080
-      # Database
+      # ========== Authentication ==========
+      # Options: local | supabase
+      AUTH_PROVIDER: ${AUTH_PROVIDER:-local}
+      # ========== Database ==========
       DATABASE_URL: postgresql://${POSTGRES_USER:-selfvault}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-selfvault}
       DIRECT_URL: postgresql://${POSTGRES_USER:-selfvault}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-selfvault}
-      # JWT
+      # ========== JWT (required for local auth) ==========
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
-      # Storage - S3/MinIO
+      # ========== Storage - S3/MinIO ==========
       STORAGE_PROVIDER: s3
       S3_ENDPOINT: http://minio:9000
       S3_REGION: us-east-1
@@ -100,7 +103,7 @@ services:
       S3_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
       S3_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
       S3_FORCE_PATH_STYLE: "true"
-      # Supabase Auth (si utilisé pour l'authentification)
+      # ========== Supabase (only if AUTH_PROVIDER=supabase) ==========
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
       SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_KEY:-}
@@ -152,6 +155,9 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
+        # Auth provider (local = no Supabase needed)
+        VITE_AUTH_PROVIDER: ${AUTH_PROVIDER:-local}
+        # Supabase (only if AUTH_PROVIDER=supabase)
         VITE_SUPABASE_URL: ${SUPABASE_URL:-}
         VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
     container_name: selfvault-frontend

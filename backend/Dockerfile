@@ -1,4 +1,32 @@
-# Stage 1: Build
+# =============================================================================
+# Stage 1: Development
+# =============================================================================
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Installer toutes les dépendances (dev incluses)
+RUN npm ci
+
+# Générer le client Prisma
+RUN npx prisma generate
+
+# Créer le dossier pour les uploads locaux
+RUN mkdir -p /app/data/uploads
+
+# Exposer le port
+EXPOSE 8080
+
+# Commande par défaut pour le dev
+CMD ["npm", "run", "dev"]
+
+# =============================================================================
+# Stage 2: Build
+# =============================================================================
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -19,8 +47,10 @@ RUN npx prisma generate
 # Compiler TypeScript
 RUN npm run build
 
-# Stage 2: Production
-FROM node:18-alpine
+# =============================================================================
+# Stage 3: Production
+# =============================================================================
+FROM node:18-alpine AS production
 
 WORKDIR /app
 
