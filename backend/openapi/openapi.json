@@ -12,6 +12,7 @@
     }
   ],
   "tags": [
+    { "name": "Auth", "description": "Authentication endpoints (login, register, logout)" },
     { "name": "System" },
     { "name": "Users" },
     { "name": "Settings" },
@@ -132,6 +133,47 @@
           "storageLimit": { "type": "string", "description": "Storage quota in bytes" },
           "preferences": { "type": "object", "additionalProperties": true }
         }
+      },
+      "LoginInput": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "example": "user@example.com" },
+          "password": { "type": "string", "minLength": 1, "example": "password123" }
+        },
+        "required": ["email", "password"]
+      },
+      "RegisterInput": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "format": "email", "example": "user@example.com" },
+          "password": { "type": "string", "minLength": 8, "example": "securepassword123" },
+          "username": { "type": "string", "minLength": 3, "maxLength": 50, "example": "johndoe" }
+        },
+        "required": ["email", "password"]
+      },
+      "RefreshTokenInput": {
+        "type": "object",
+        "properties": {
+          "refreshToken": { "type": "string" }
+        },
+        "required": ["refreshToken"]
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "user": { "$ref": "#/components/schemas/User" },
+          "accessToken": { "type": "string" },
+          "refreshToken": { "type": "string" },
+          "expiresIn": { "type": "integer", "description": "Token expiration in seconds" }
+        },
+        "required": ["user", "accessToken"]
+      },
+      "AuthProviderResponse": {
+        "type": "object",
+        "properties": {
+          "provider": { "type": "string", "enum": ["local", "supabase"], "example": "local" }
+        },
+        "required": ["provider"]
       }
     },
     "responses": {
@@ -165,6 +207,152 @@
     { "bearerAuth": [] }
   ],
   "paths": {
+    "/api/auth/provider": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get configured authentication provider",
+        "description": "Returns the authentication provider configured for this instance (local or supabase)",
+        "responses": {
+          "200": {
+            "description": "Authentication provider information",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthProviderResponse" }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "description": "Create a new user account. Works with both local and Supabase auth providers.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "409": {
+            "description": "User already exists",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login with email and password",
+        "description": "Authenticate a user and return access tokens. Works with both local and Supabase auth providers.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully authenticated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Logout current user",
+        "description": "Invalidate the current session. For Supabase, this revokes the refresh token.",
+        "responses": {
+          "200": {
+            "description": "Successfully logged out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Logged out successfully" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Refresh access token",
+        "description": "Get a new access token using a refresh token. Useful for maintaining user sessions.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RefreshTokenInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New tokens generated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": {
+            "description": "Invalid or expired refresh token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
     "/api/health": {
       "get": {
         "tags": ["System"],
